@@ -1,0 +1,41 @@
+asyncapi: 2.0.0
+info:
+  title: Cart Sample
+  version: 1.0.0
+  description: |
+    Cart Async Api Example
+servers:
+  default:
+    url: 'events.asyncapi.org:{port}'
+    description: Event bus
+    variables:
+      port:
+        enum:
+          - '9090'
+          - '9091'
+        default: '9090'
+    protocol: kafka
+components:
+  messages:
+    cart.lines.add:
+      $ref: "messages.yml#/components/messages/cart.lines.add"
+    cart.lines.remove:
+      $ref: "messages.yml#/components/messages/cart.lines.remove"
+  schemas:
+    cart.header.v1:
+      $ref: "schemas.yml#/components/schemas/cart.header.v1"
+
+channels:
+  checkout/cart/lines:
+    x-event-type:
+      - action
+    publish:
+      operationId: AddOrRemoveCartLines
+      message:
+        oneOf:
+          - $ref: "messages.yml#/components/messages/cart.lines.add"
+          - $ref: 'messages.yml#/components/messages/cart.lines.remove'
+    subscribe:
+      operationId: CartLineAdded
+      message:
+        $ref: '#/components/messages/cart.lines.add'

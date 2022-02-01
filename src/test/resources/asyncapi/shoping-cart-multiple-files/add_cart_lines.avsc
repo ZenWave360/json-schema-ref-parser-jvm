@@ -1,0 +1,13 @@
+{
+    "namespace": "org.asyncapi.tools.example.dtos",
+    "type": "record",
+    "name": "AddLine",
+    "doc": "This is the add line message",
+    "fields": [
+      {
+        "name": "skus",
+        "type": {"type": "array", "items": "CartLine"},
+        "doc": "Items to add"
+      }
+    ]
+}

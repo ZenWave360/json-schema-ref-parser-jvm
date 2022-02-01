@@ -1,0 +1,78 @@
+asyncapi: '2.0.0'
+info:
+  title: Nested Schemas Example
+  version: '1.0.0'
+
+defaultContentType: application/json
+
+channels:
+  personOrCompany:
+    publish:
+      operationId: onPersonOrCompanyEvent
+      tags:
+        - People
+      message:
+        oneOf:
+          - $ref: '#/components/messages/People'
+          - $ref: '#/components/messages/Companies'
+
+components:
+  messages:
+    People:
+      name: People
+      title: People
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/People"
+    Companies:
+      name: Companies
+      title: Companies
+      payload:
+        $ref: "#/components/schemas/Companies"
+
+  schemas:
+    People:
+      type: array
+      items:
+        $ref: '#/components/schemas/Person'
+    Person:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        date:
+          type: string
+          format: date
+        dateTime:
+          type: string
+          format: date-time
+        time:
+          type: string
+          format: time
+        personAddress:
+          $ref: '#/components/schemas/Address'
+    Address:
+      type: object
+      properties:
+        line1:
+          type: string
+        city:
+          type: string
+        country:
+          type string
+    Companies:
+      type: array
+      items:
+        $ref: '#/components/schemas/Company'
+    Company:
+      type: object
+      properties:
+        name: 
+          type: string
+        nif:
+          type: string
+        companyAddress:
+          $ref:  '#/components/schemas/Address'
+      

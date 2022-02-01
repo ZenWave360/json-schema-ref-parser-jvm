@@ -1,0 +1,33 @@
+asyncapi: '2.0.0'
+info:
+  title: Nested Schemas Example
+  version: '1.0.0'
+
+defaultContentType: application/json
+
+channels:
+  event:
+    publish:
+      operationId: onEvent
+      tags:
+        - name: Event
+          externalDocs:
+            url: tratra
+      message:
+        $ref: '#/components/messages/Event'
+    subscribe:
+      operationId: onEvent2
+      tags:
+        - Event2
+      message:
+        $ref: '#/components/messages/Event'
+
+components:
+  messages:
+    Event:
+      name: Event
+      title: Event
+      contentType: application/json
+      payload:
+        $ref: "schemas/Person.schema"
+      

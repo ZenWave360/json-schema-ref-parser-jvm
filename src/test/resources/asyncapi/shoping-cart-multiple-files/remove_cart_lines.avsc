@@ -1,0 +1,13 @@
+{
+    "namespace": "org.asyncapi.tools.example.dtos",
+    "type": "record",
+    "name": "RemoveLine",
+    "doc": "This is the remove line message",
+    "fields": [
+        {
+            "name": "skus",
+            "type": {"type": "array", "items": "CartLine"},
+            "doc": "Items to remove"
+        }
+    ]
+}

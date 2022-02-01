@@ -1,0 +1,17 @@
+type: object
+properties:
+  name:
+    type: string
+  email:
+    type: string
+  date:
+    type: string
+    format: date
+  dateTime:
+    type: string
+    format: date-time
+  time:
+    type: string
+    format: time
+  personAddress:
+    $ref: 'Address.schema'

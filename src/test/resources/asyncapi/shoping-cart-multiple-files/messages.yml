@@ -1,0 +1,26 @@
+components:
+  messages:
+    cart.lines.add:
+      summary: Add lines to a cart
+      description: |
+        Message sent when adding lines to a cart
+      tags:
+        - name: cart
+        - name: stock
+      headers:
+        $ref: 'schemas.yml#/components/schemas/cart.header.v1'
+      schemaFormat: 'application/vnd.apache.avro;version=1.9.0'
+      payload:
+        $ref: 'add_cart_lines.avsc'
+    cart.lines.remove:
+      summary: Remove lines from a cart
+      description: |
+        Message sent when removing lines from a cart
+      tags:
+        - name: cart
+        - name: stock
+      headers:
+        $ref: 'schemas.yml#/components/schemas/cart.header.v1'
+      schemaFormat: 'application/vnd.apache.avro;version=1.9.0'
+      payload:
+        $ref: 'remove_cart_lines.avsc'

@@ -1,0 +1,13 @@
+{
+"namespace": "org.asyncapi.tools.example.dtos",
+    "type": "record",
+    "name": "CartLine",
+    "doc": "This is the line item",
+    "fields": [
+        {
+            "name": "id",
+            "type": "string",
+            "doc": "Line identifier"
+        }
+    ]
+}

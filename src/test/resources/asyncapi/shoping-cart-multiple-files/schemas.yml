@@ -1,0 +1,26 @@
+components:
+  schemas:
+    cart.header.v1:
+      type: object
+      required:
+        - eventName
+        - messageId
+        - timestamp
+      properties:
+        eventName:
+          type: string
+          description: 'Fully Qualified Name of the Event, e.g. checkout.cart.lines.v1'
+        messageId:
+          type: string
+          description: Unique Universal IDentifier of this instance of the event
+        timestamp:
+          type: string
+          description: Publication timestamp of this instance of the event
+        deprecationDate:
+          type: string
+          default: <no-value>
+          description: >-
+            Last valid date for this version of the event schema. Before this
+            day clients should be compatible with the last version of the event
+            schema. Required if and only if this version of the schema is
+            deprecated

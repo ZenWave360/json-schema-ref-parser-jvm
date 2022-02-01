@@ -1,0 +1,42 @@
+asyncapi: '2.0.0'
+info:
+  title: NDS WMQ async api spec
+  version: '1.0.0'
+
+defaultContentType: application/json
+
+channels:
+  transportNotification:
+    publish:
+      operationId: onTransportNotificationEvent
+      message:
+        name:  TransportNotivanificationEventMessage
+        header:
+          $ref: '#/components/schemas/logistic.wmq.header.v1'
+        schemaFormat: 'application/schema+json;version=draft-07'
+        payload:
+          $ref: '#/components/schemas/MyPayload'
+
+components:
+  schemas:
+    logistic.wmq.header.v1:
+      type: object
+      required:
+        - fileName
+        - messageVersion
+      properties:
+        fileName:
+          type: string
+        messageVersion:
+          type: string
+        source:
+          type: string
+    MyPayload:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+      
