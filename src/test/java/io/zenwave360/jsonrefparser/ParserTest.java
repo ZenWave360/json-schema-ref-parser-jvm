@@ -20,62 +20,71 @@ public class ParserTest {
     }
 
     @Test
-    public void testParseAsyncapiNestedSchemas() throws IOException {
+    public void testDereferenceAsyncapiNestedSchemas() throws IOException {
         File file = new File("src/test/resources/asyncapi/schemas/json-schemas-payload.yml");
         $RefParser parser = new $RefParser(file);
-        $Refs refs = parser.dereference();
+        $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
     }
 
     @Test
-    public void testParseAsyncapiNestedSchemasExternalRef() throws IOException {
+    public void testDereferenceAsyncapiNestedSchemasExternalRef() throws IOException {
         File file = new File("src/test/resources/asyncapi/schemas/json-schemas-external-ref.yml");
         $RefParser parser = new $RefParser(file);
-        $Refs refs = parser.dereference();
+        $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
     }
 
     @Test
-    public void testParseAsyncapiShoppingCartWithAvros() throws IOException {
+    public void testDereferenceAsyncapiShoppingCartWithAvros() throws IOException {
         File file = new File("src/test/resources/asyncapi/shoping-cart-multiple-files/shoping-cart-multiple-files.yml");
         $RefParser parser = new $RefParser(file);
-        $Refs refs = parser.dereference();
+        $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
     }
 
     @Test
-    public void testParseAsyncapiShoppingCartWithAvroArray() throws IOException {
+    public void testDereferenceAsyncapiShoppingCartWithAvroArray() throws IOException {
         File file = new File("src/test/resources/asyncapi/shoping-cart-avro-array/shoping-cart.yml");
         $RefParser parser = new $RefParser(file);
-        $Refs refs = parser.dereference();
+        $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
     }
 
     @Test
-    public void testParseAsyncapiJsonSchema() throws IOException {
+    public void testDereferenceAsyncapiJsonSchema() throws IOException {
         File file = new File("src/test/resources/asyncapi/transport+jsonschema/asyncapi.yml");
         $RefParser parser = new $RefParser(file);
-        $Refs refs = parser.dereference();
+        $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
     }
 
     @Test
-    public void testParseAsyncapiCircular() throws IOException {
+    public void testDereferenceAndMergeAllOf() throws IOException {
+        File file = new File("src/test/resources/openapi/allOf.yml");
+        $RefParser parser = new $RefParser(file);
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        Assert.assertFalse(refs.circular);
+//        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+    }
+
+    @Test
+    public void testDereferenceAsyncapiCircular() throws IOException {
         File file = new File("src/test/resources/asyncapi/circular-refs/asyncapi.yml");
         {
             $RefParser parser = new $RefParser(file);
-            $Refs refs = parser.dereference();
+            $Refs refs = parser.dereference().getRefs();
             Assert.assertTrue(refs.circular);
         }
 
         {
             $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
-            $Refs refs = parser.dereference();
+            $Refs refs = parser.dereference().getRefs();
             Assert.assertFalse(refs.circular);
 //            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
         }
@@ -83,7 +92,7 @@ public class ParserTest {
         {
             $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.FAIL));
             try {
-                $Refs refs = parser.dereference();
+                $Refs refs = parser.dereference().getRefs();
                 Assert.fail("Circular references should not be allowed");
             } catch (RuntimeException e) {
                 Assert.assertTrue(e.getMessage().contains("Circular references not allowed"));
