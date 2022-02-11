@@ -8,9 +8,44 @@
   <artifactId>json-schema-ref-parser-jvm</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
-  <name>json-schema-ref-parser-jvm</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>JSON Schema Ref Parser for Java</description>
+  <url>https://github.com/ZenWave360/json-schema-ref-parser-jvm</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Ivan Garcia Sainz-Aja</name>
+      <email>ivangsa@gmail.com</email>
+      <organization>ZenWave360</organization>
+      <organizationUrl>https://github.com/ZenWave360</organizationUrl>
+    </developer>
+  </developers>
+
+  <distributionManagement>
+    <repository>
+      <id>ossrh</id>
+      <name>Central Repository OSSRH</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <name>Central Repository OSSRH</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <scm>
+    <connection>scm:git:git://github.com/ZenWave360/json-schema-ref-parser-jvm.git</connection>
+    <developerConnection>scm:git:git@github.com:ZenWave360/ZenWave360.git</developerConnection>
+    <url>https://github.com/ZenWave360/json-schema-ref-parser-jvm</url>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -78,11 +113,45 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.0</version>
         <executions>
           <execution>
             <id>attach-sources</id>
             <goals>
               <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.7</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <!-- attached to Maven test phase -->
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
             </goals>
           </execution>
         </executions>
