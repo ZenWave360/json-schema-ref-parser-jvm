@@ -87,7 +87,7 @@ public class $Refs {
 
     public List<String> refs(String... types) {
         if(types == null || types.length == 0) {
-            return paths;
+            return refs;
         }
         // TODO filter for more than one
         return this.refs.stream().filter(ref -> ref.startsWith(types[0])).collect(Collectors.toList());

@@ -6,9 +6,10 @@ import io.zenwave360.jsonrefparser.resolver.FileResolver;
 import io.zenwave360.jsonrefparser.resolver.HttpResolver;
 import io.zenwave360.jsonrefparser.resolver.RefFormat;
 import io.zenwave360.jsonrefparser.resolver.Resolver;
-import io.zenwave360.jsonrefparser.utils.AuthenticationValue;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,8 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.math.NumberUtils.isDigits;
 
 public class $RefParser {
+
+    private static final Logger log = LoggerFactory.getLogger($RefParser.class);
 
     public final URL url;
 
@@ -50,6 +53,7 @@ public class $RefParser {
 
     public $RefParser withAuthentication(AuthenticationValue authenticationValue) {
         this.authenticationValues.add(authenticationValue);
+        this.resolvers.values().forEach(resolver -> resolver.withAuthentication(authenticationValue));
         return this;
     }
 
@@ -95,8 +99,8 @@ public class $RefParser {
             String jsonPath = jsonPath(jsonPaths);
             try {
                 jsonContext.set(jsonPath, mergedAllOfObject);
-            }catch (Exception e){
-                e.printStackTrace();
+            } catch (Exception e){
+                log.error("Error merging allOf file:{} jsonPath,{}", currentFileURL.toExternalForm(), jsonPath, e);
             }
         } else if(value instanceof Map) {
             // visit
@@ -127,14 +131,14 @@ public class $RefParser {
             }
 
             // do dereference
-            Object resolved = dereference($ref);
+            Object resolved = dereference($ref, jsonContext);
             this.refs.saveOriginalRef($ref, resolved);
             String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
             String jsonPath = jsonPath(jsonPaths);
             try {
                 jsonContext.set(jsonPath, resolved);
             }catch (Exception e){
-                e.printStackTrace();
+                log.error("Error merging allOf file:{} jsonPath,{}", currentFileURL.toExternalForm(), jsonPath, e);
             }
         } else if(value instanceof Map) {
              // visit
@@ -150,9 +154,8 @@ public class $RefParser {
         }
     }
 
-    private Object dereference($Ref $ref) {
+    private Object dereference($Ref $ref, JsonContext jsonContext) {
         this.refs.addRef($ref.getRef());
-        JsonContext jsonContext = this.refs.jsonContext;
         // resolve external file
         if($ref.getRefFormat().isAnExternalRefFormat()) {
             this.refs.addPath($ref.getUrl());
@@ -173,8 +176,14 @@ public class $RefParser {
         // resolve internal path
         if(StringUtils.isNotBlank($ref.getPath())) {
             String jsonPaths[] = $ref.getPath().replace($Ref.REFERENCE_SEPARATOR, "").split("/");
-            Object resolved = jsonContext.read(jsonPath(jsonPaths));
-            return resolved;
+            String jsonPath = jsonPath(jsonPaths);
+            try {
+                Object resolved = jsonContext.read(jsonPath);
+                return resolved;
+            } catch (Exception e) {
+                log.error("Error reading internal path: {}", $ref, e);
+                throw e;
+            }
         }
         return jsonContext.json();
     }

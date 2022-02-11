@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.jsonrefparser.resolver.HttpResolver;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,6 +26,9 @@ public class ParserTest {
         $RefParser parser = new $RefParser(file);
         $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
+        Assert.assertFalse(refs.paths("file").isEmpty());
+        Assert.assertFalse(refs.refs("#/").isEmpty());
+        Assert.assertTrue(refs.get("$.components.messages.People") != null);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
     }
 
@@ -71,6 +75,51 @@ public class ParserTest {
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+    }
+
+    @Test
+    public void testDereferenceHttpRefs() throws IOException {
+        File file = new File("src/test/resources/openapi/http-external-refs.yml");
+        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        Assert.assertFalse(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+    }
+
+    @Test
+    public void testDereferenceHttpRefsSelfSignedCerts() throws IOException {
+        System.setProperty(HttpResolver.TRUST_ALL, "true");
+        File file = new File("src/test/resources/openapi/http-external-refs.yml");
+        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        Assert.assertFalse(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+    }
+
+    @Test
+    public void testDereferenceHttpRefsWithHeaderAuthentication() throws IOException {
+        File file = new File("src/test/resources/openapi/http-external-refs.yml");
+        $RefParser parser = new $RefParser(file)
+                .withAuthentication(new AuthenticationValue()
+                        .withHeader("Basic: ")
+                        .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
+                .withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        Assert.assertFalse(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+    }
+
+    @Test
+    public void testDereferenceHttpRefsWithQueryAuthentication() throws IOException {
+        File file = new File("src/test/resources/openapi/http-external-refs.yml");
+        $RefParser parser = new $RefParser(file)
+                .withAuthentication(new AuthenticationValue()
+                        .withQueryParam("token", "blablabla")
+                        .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
+                .withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        Assert.assertFalse(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
     }
 
     @Test

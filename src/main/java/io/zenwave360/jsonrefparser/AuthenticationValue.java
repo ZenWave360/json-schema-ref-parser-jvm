@@ -1,4 +1,4 @@
-package io.zenwave360.jsonrefparser.utils;
+package io.zenwave360.jsonrefparser;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 public class AuthenticationValue {
 
+    private static final Predicate<URL> ANY_MATCH = (url) -> true;
+
     public static enum AuthenticationType {
         QUERY,
         HEADER;
@@ -19,7 +21,7 @@ public class AuthenticationValue {
     private String value;
     private AuthenticationType type = AuthenticationType.HEADER;
 
-    private Predicate<URL> urlMatcher;
+    private Predicate<URL> urlMatcher = ANY_MATCH;
 
     public AuthenticationValue() {
     }
@@ -31,21 +33,31 @@ public class AuthenticationValue {
         this.urlMatcher = urlMatcher;
     }
 
-    public AuthenticationValue withQueryParams(String key, String value) {
-        return new AuthenticationValue(key, value, AuthenticationType.QUERY, null);
+    public AuthenticationValue withQueryParam(String key, String value) {
+        this.key = key;
+        this.value = value;
+        this.type = AuthenticationType.QUERY;
+        return this;
     }
 
-    public static AuthenticationValue withHeader(String header) {
+    public AuthenticationValue withHeader(String header) {
         String[] split = StringUtils.split(header, ":");
-        String key = StringUtils.trim(split[0]);
-        String value = StringUtils.trim(split[1]);
-        return new AuthenticationValue(key, value, AuthenticationType.HEADER, null);
+        this.key = StringUtils.trim(split[0]);
+        this.value = StringUtils.trim(split[1]);
+        this.type = AuthenticationType.HEADER;
+        return this;
     }
 
-    public static List<AuthenticationValue> headersFromCsv(String csv) {
-        return Arrays.asList(csv.split(",|;|\n|\t"))
-                .stream().map(header -> withHeader(header))
-                .collect(Collectors.toList());
+    public AuthenticationValue withHeader(String key, String value) {
+        this.key = key;
+        this.value = value;
+        this.type = AuthenticationType.HEADER;
+        return this;
+    }
+
+    public AuthenticationValue withUrlMatcher(Predicate<URL> urlMatcher) {
+        this.urlMatcher = urlMatcher;
+        return this;
     }
 
     public String getKey() {
