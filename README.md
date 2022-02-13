@@ -5,9 +5,7 @@ JSON Schema $Ref Parser for the JVM
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/json-schema-ref-parser-jvm?logo=GitHub)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/releases)
 [![build](https://github.com/ZenWave360/json-schema-ref-parser-jvm/workflows/build/badge.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml)
 [![coverage](../badges/jacoco.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml) [![branches coverage](../badges/branches.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml)
-<!--
 [![GitHub](https://img.shields.io/github/license/ZenWave360/json-schema-ref-parser-jvm)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/blob/main/LICENSE)
--->
 
 
 Parse, Resolve, and Dereference JSON Schema $ref pointers
