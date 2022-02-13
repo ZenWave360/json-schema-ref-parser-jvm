@@ -1,6 +1,15 @@
 JSON Schema $Ref Parser for the JVM
 =====================================
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360/json-schema-ref-parser-jvm.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360/json-schema-ref-parser-jvm)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/json-schema-ref-parser-jvm?logo=GitHub)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/releases)
+[![build](https://github.com/ZenWave360/json-schema-ref-parser-jvm/workflows/build/badge.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml)
+[![coverage](../badges/jacoco.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml) [![branches coverage](../badges/branches.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml)
+<!--
+[![GitHub](https://img.shields.io/github/license/ZenWave360/json-schema-ref-parser-jvm)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/blob/main/LICENSE)
+-->
+
+
 Parse, Resolve, and Dereference JSON Schema $ref pointers
 
 This is a Java implementation of the wonderful Node.js [JSON Schema $Ref Parser](https://apitools.dev/json-schema-ref-parser/).
@@ -58,13 +67,25 @@ Assert.assertFalse(refs.circular);
 
 ```
 
+With authentication:
+
+```java
+File file = new File("src/test/resources/openapi/http-external-refs.yml");
+$RefParser parser = new $RefParser(file)
+        .withAuthentication(new AuthenticationValue()
+                .withHeader("Bearer", "<token>")
+                .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
+        .withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+$Refs refs = parser.dereference().mergeAllOf().getRefs();
+```
+
 Installation:
 --------------------------
 ```xml
 <dependency>
   <groupId>io.github.zenwave360</groupId>
   <artifactId>json-schema-ref-parser-jvm</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>${json-schema-ref-parser-jvm.version}</version>
 </dependency>
 ```
 
