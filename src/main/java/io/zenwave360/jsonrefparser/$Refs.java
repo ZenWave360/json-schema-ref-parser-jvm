@@ -75,6 +75,7 @@ public class $Refs {
      * Returns the paths/URLs of all the files in your schema (including the main schema file).
      *
      * @param types (optional) Optionally only return certain types of paths ("file", "http", etc.)
+     * @return paths/URLs of all files in your schema
      */
     public List<String> paths(String... types) {
         if(types == null || types.length == 0) {

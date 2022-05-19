@@ -259,7 +259,7 @@
     "name": "LinesAddedEvent",
     "namespace": "org.asyncapi.tools.example.event.cart.v1",
     "type": "record",
-    "subject": "meccano.purchase.cart.v1-value",
+    "subject": "ecommerce.purchase.cart.v1-value",
     "fields": [
       {
         "name": "lines",
@@ -276,7 +276,7 @@
     "name": "LinesRemovedEvent",
     "namespace": "org.asyncapi.tools.example.event.cart.v1",
     "type": "record",
-    "subject": "meccano.purchase.cart.v1-value",
+    "subject": "ecommerce.purchase.cart.v1-value",
     "fields": [
       {
         "name": "lines",

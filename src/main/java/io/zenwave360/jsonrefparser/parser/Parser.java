@@ -47,7 +47,7 @@ public class Parser {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         Configuration.setDefaults(new Configuration.Defaults() {
 
-            private final JsonProvider jsonProvider = new JacksonJsonProvider(mapper);
+            private final JsonProvider jsonProvider = new CustomJacksonJsonProvider(mapper);
             private final MappingProvider mappingProvider = new JacksonMappingProvider(mapper);
 
             @Override

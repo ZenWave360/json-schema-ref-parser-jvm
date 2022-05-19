@@ -100,7 +100,8 @@ public class $RefParser {
             try {
                 jsonContext.set(jsonPath, mergedAllOfObject);
             } catch (Exception e){
-                log.error("Error merging allOf file:{} jsonPath,{}", currentFileURL.toExternalForm(), jsonPath, e);
+                log.error("Error setting jsonPath:{} in file:{}", jsonPath, currentFileURL.toExternalForm(), e);
+                throw e;
             }
         } else if(value instanceof Map) {
             // visit
@@ -138,7 +139,8 @@ public class $RefParser {
             try {
                 jsonContext.set(jsonPath, resolved);
             }catch (Exception e){
-                log.error("Error merging allOf file:{} jsonPath,{}", currentFileURL.toExternalForm(), jsonPath, e);
+                log.error("Error setting jsonPath: {} in {}", jsonPath,  currentFileURL.toExternalForm(), e);
+                throw e;
             }
         } else if(value instanceof Map) {
              // visit
@@ -189,7 +191,7 @@ public class $RefParser {
     }
 
     private String jsonPath(String[] paths) {
-        return "$" + Arrays.stream(paths).map(path -> isDigits(path)? "[" + path + "]" : "['" + path + "']").collect(Collectors.joining());
+        return "$" + Arrays.stream(paths).map(path -> "['" + path + "']").collect(Collectors.joining());
     }
 
     private String jsonPointer(String[] paths) {

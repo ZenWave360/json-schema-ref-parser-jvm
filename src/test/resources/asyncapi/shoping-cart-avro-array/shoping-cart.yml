@@ -9,12 +9,12 @@ servers:
   production:
     url: servername[1-5].server:{port}
     protocol: mqtt
-    description: PIPE Broker
+    description: Kafka Broker
 
 defaultContentType: application/*+avro
 
 channels:
-  meccano.${tenant}.${environment}.purchase.cart.public.v1:
+  ecommerce.${tenant}.${environment}.purchase.cart.public.v1:
     description: The topic on which cart publish modification events.
     parameters:
       tenant:
@@ -88,5 +88,5 @@ components:
       headers:
         type: object
         properties:
-          amiga-metadata-session:
+          ecommerce-metadata-session:
             type: string
