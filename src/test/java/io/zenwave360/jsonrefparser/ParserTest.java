@@ -80,7 +80,7 @@ public class ParserTest {
     @Test
     public void testDereferenceHttpRefs() throws IOException {
         File file = new File("src/test/resources/openapi/http-external-refs.yml");
-        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP));
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
@@ -90,7 +90,7 @@ public class ParserTest {
     public void testDereferenceHttpRefsSelfSignedCerts() throws IOException {
         System.setProperty(HttpResolver.TRUST_ALL, "true");
         File file = new File("src/test/resources/openapi/http-external-refs.yml");
-        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP));
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
@@ -103,7 +103,7 @@ public class ParserTest {
                 .withAuthentication(new AuthenticationValue()
                         .withHeader("Basic: ")
                         .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
-                .withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+                .withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP));
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
@@ -116,7 +116,7 @@ public class ParserTest {
                 .withAuthentication(new AuthenticationValue()
                         .withQueryParam("token", "blablabla")
                         .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
-                .withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+                .withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP));
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
@@ -132,14 +132,14 @@ public class ParserTest {
         }
 
         {
-            $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+            $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP));
             $Refs refs = parser.dereference().getRefs();
             Assert.assertFalse(refs.circular);
 //            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
         }
 
         {
-            $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.FAIL));
+            $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.FAIL));
             try {
                 $Refs refs = parser.dereference().getRefs();
                 Assert.fail("Circular references should not be allowed");

@@ -2,12 +2,14 @@ package io.zenwave360.jsonrefparser;
 
 import com.jayway.jsonpath.internal.JsonContext;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,7 +25,7 @@ public class $Refs {
     public final URL file;
     public final URL rootDir;
 
-    private Map<Object, $Ref> originalRefsBackMap = new HashMap<>();
+    private List<Pair<$Ref, Object>> originalRefsList = new ArrayList<>();
 
     public $Refs(JsonContext jsonContext) {
         this.jsonContext = jsonContext;
@@ -46,6 +48,17 @@ public class $Refs {
         }
     }
 
+    public List<Pair<$Ref, Object>> getOriginalRefsList() {
+        return originalRefsList;
+    }
+
+    public $Ref getOriginalRef(Object obj) {
+        return originalRefsList.stream()
+                .filter(pair -> pair.getValue() == obj)
+                .map(pair -> pair.getKey())
+                .findFirst().orElse(null);
+    }
+
     public void addRef(String ref) {
         if(ref != null && !this.refs.contains(ref)) {
             this.refs.add(ref);
@@ -59,11 +72,11 @@ public class $Refs {
     }
 
     public void saveOriginalRef($Ref originalRef, Object resolved) {
-        if(this.circular) {
-            return;
-        }
+//        if(this.circular) {
+//            return;
+//        }
         if(!originalRef.equals(resolved)) {
-            this.originalRefsBackMap.put(resolved, originalRef);
+            this.originalRefsList.add(Pair.of(originalRef, resolved));
         }
     }
 

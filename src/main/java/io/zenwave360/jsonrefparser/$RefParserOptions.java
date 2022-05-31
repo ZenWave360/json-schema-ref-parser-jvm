@@ -9,7 +9,18 @@ public class $RefParserOptions {
     
     public OnCircular onCircular = OnCircular.RESOLVE;
 
+    public $RefParserOptions() {
+
+    }
+
+    @Deprecated
     public $RefParserOptions(OnCircular onCircular) {
         this.onCircular = onCircular;
     }
+
+    public $RefParserOptions withOnCircular(OnCircular onCircular) {
+        this.onCircular = onCircular;
+        return this;
+    }
+
 }
