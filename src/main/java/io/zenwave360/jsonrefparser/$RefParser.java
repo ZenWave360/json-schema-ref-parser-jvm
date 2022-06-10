@@ -1,6 +1,8 @@
 package io.zenwave360.jsonrefparser;
 
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.internal.JsonContext;
+import io.zenwave360.jsonrefparser.parser.ExtendedJsonContext;
 import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.jsonrefparser.resolver.FileResolver;
 import io.zenwave360.jsonrefparser.resolver.HttpResolver;
@@ -35,7 +37,7 @@ public class $RefParser {
         resolvers.put(RefFormat.RELATIVE, new FileResolver());
         resolvers.put(RefFormat.URL, new HttpResolver());
     }
-    private Map<String, JsonContext> cache = new HashMap<>();
+    private Map<String, ExtendedJsonContext> cache = new HashMap<>();
     private List<AuthenticationValue> authenticationValues = new ArrayList<>();
 
     private $RefParserOptions options;
@@ -83,7 +85,7 @@ public class $RefParser {
         return this;
     }
 
-    private void mergeAllOf(JsonContext jsonContext, Object value, String[] paths, URL currentFileURL) {
+    private void mergeAllOf(ExtendedJsonContext jsonContext, Object value, String[] paths, URL currentFileURL) {
         if(paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
             List allOf = (List) value;
             Map<String, Object> mergedAllOfObject = new HashMap<>();
@@ -117,7 +119,7 @@ public class $RefParser {
         }
     }
 
-    private void dereference(JsonContext jsonContext, Object value, String[] paths, URL currentFileURL) {
+    private void dereference(ExtendedJsonContext jsonContext, Object value, String[] paths, URL currentFileURL) {
          if(paths.length > 0 && "$ref".equals(paths[paths.length -1])) {
             $Ref $ref = $Ref.of((String) value, currentFileURL);
             // check if is circular
@@ -156,7 +158,7 @@ public class $RefParser {
         }
     }
 
-    private Object dereference($Ref $ref, JsonContext jsonContext) {
+    private Object dereference($Ref $ref, ExtendedJsonContext jsonContext) {
         this.refs.addRef($ref.getRef());
         // resolve external file
         if($ref.getRefFormat().isAnExternalRefFormat()) {
@@ -169,6 +171,7 @@ public class $RefParser {
                 String resolved = resolver.resolve($ref);
                 jsonContext = Parser.parse(resolved);
                 cache.put(refUrl, jsonContext);
+                this.refs.addJsonContext($ref.getUrl(), jsonContext);
                 if(jsonContext.json() instanceof Map || jsonContext.json() instanceof List) {
                     dereference(jsonContext, jsonContext.json(), new String[0], $ref.getUrl());
                 }

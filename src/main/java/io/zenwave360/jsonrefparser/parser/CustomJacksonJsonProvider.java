@@ -1,6 +1,8 @@
 package io.zenwave360.jsonrefparser.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.jayway.jsonpath.spi.json.JacksonJsonNodeJsonProvider;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -21,8 +23,8 @@ class CustomJacksonJsonProvider extends JacksonJsonProvider {
 
     private Logger log = LoggerFactory.getLogger(CustomJacksonJsonProvider.class);
 
-    public CustomJacksonJsonProvider(ObjectMapper objectMapper) {
-        super(objectMapper);
+    public CustomJacksonJsonProvider(ObjectMapper objectMapper, ObjectReader objectReader) {
+        super(objectMapper, objectReader);
     }
 
     public boolean isArray(Object obj) {

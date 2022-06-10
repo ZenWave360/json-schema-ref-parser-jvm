@@ -12,6 +12,8 @@ Parse, Resolve, and Dereference JSON Schema $ref pointers
 
 This is a Java implementation of the wonderful Node.js [JSON Schema $Ref Parser](https://apitools.dev/json-schema-ref-parser/).
 
+It also calculates [json-path -> to file location range](#) for parsed files inspired in [@stoplight/yaml](https://github.com/stoplightio/yaml)
+
 The Problem:
 --------------------------
 
@@ -59,7 +61,7 @@ Skip (leave unresolved) circular references:
 
 ```java
 $RefParser parser = new $RefParser(file)
-        .withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        .withOptions(new $RefParserOptions().withOnCircular(SKIP));
 $Refs refs = parser.dereference().getRefs();
 Assert.assertFalse(refs.circular);
 
@@ -73,7 +75,7 @@ $RefParser parser = new $RefParser(file)
         .withAuthentication(new AuthenticationValue()
                 .withHeader("Bearer", "<token>")
                 .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
-        .withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        .withOptions(new $RefParserOptions().withOnCircular(SKIP));
 $Refs refs = parser.dereference().mergeAllOf().getRefs();
 ```
 

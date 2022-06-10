@@ -1,6 +1,7 @@
 package io.zenwave360.jsonrefparser;
 
-import com.jayway.jsonpath.internal.JsonContext;
+import com.fasterxml.jackson.core.JsonLocation;
+import io.zenwave360.jsonrefparser.parser.ExtendedJsonContext;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -21,13 +22,17 @@ public class $Refs {
     private final List<String> paths = new ArrayList<>();
     private final List<String> refs = new ArrayList<>();
 
-    public JsonContext jsonContext;
+    public ExtendedJsonContext jsonContext;
+
+    private Map<URL, ExtendedJsonContext> jsonContextMap = new HashMap<>();
+
     public final URL file;
     public final URL rootDir;
 
+    // References are kept on a list (instead of a Map) because Map.hashCode() is calculated recursively and may be circular references.
     private List<Pair<$Ref, Object>> originalRefsList = new ArrayList<>();
 
-    public $Refs(JsonContext jsonContext) {
+    public $Refs(ExtendedJsonContext jsonContext) {
         this.jsonContext = jsonContext;
         this.file = null;
         try {
@@ -37,7 +42,7 @@ public class $Refs {
         }
     }
 
-    public $Refs(JsonContext jsonContext, URL file) {
+    public $Refs(ExtendedJsonContext jsonContext, URL file) {
         this.jsonContext = jsonContext;
         this.file = file;
         String parentFile = FilenameUtils.getFullPath(file.toExternalForm()) + (file.getQuery() != null? "?" + file.getQuery() : "");
@@ -69,6 +74,10 @@ public class $Refs {
         if(url != null && !this.paths.contains(url.toExternalForm())) {
             this.paths.add(url.toExternalForm());
         }
+    }
+
+    public void addJsonContext(URL url, ExtendedJsonContext jsonContext) {
+        jsonContextMap.put(url, jsonContext);
     }
 
     public void saveOriginalRef($Ref originalRef, Object resolved) {
@@ -105,6 +114,16 @@ public class $Refs {
         }
         // TODO filter for more than one
         return this.refs.stream().filter(ref -> ref.startsWith(types[0])).collect(Collectors.toList());
+    }
+
+    public Pair<JsonLocation, JsonLocation> getJsonLocationRange(String jsonPath) {
+        return jsonContext.getJsonLocationsContext().getLocations().get(jsonPath);
+    }
+    public Pair<JsonLocation, JsonLocation> getJsonLocationRange(URL fileURL, String jsonPath) {
+        if(jsonContextMap.containsKey(fileURL)) {
+            return jsonContextMap.get(fileURL).getJsonLocationsContext().getLocations().get(jsonPath);
+        }
+        return null;
     }
 
     public Object get(String $ref) {
