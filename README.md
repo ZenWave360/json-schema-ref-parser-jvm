@@ -79,6 +79,15 @@ $RefParser parser = new $RefParser(file)
 $Refs refs = parser.dereference().mergeAllOf().getRefs();
 ```
 
+Calculate json-path -> to file location range:
+
+```java
+File file = new File("src/test/resources/openapi/allOf.yml");
+$RefParser parser = new $RefParser(file);
+$Refs refs = parser.dereference().mergeAllOf().getRefs();
+Pair<JsonLocation, JsonLocation> locations = refs.getJsonLocationRange("$.info");
+```
+
 Installation:
 --------------------------
 ```xml

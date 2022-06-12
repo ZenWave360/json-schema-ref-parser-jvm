@@ -117,11 +117,11 @@ public class $Refs {
     }
 
     public Pair<JsonLocation, JsonLocation> getJsonLocationRange(String jsonPath) {
-        return jsonContext.getJsonLocationsContext().getLocations().get(jsonPath);
+        return jsonContext.getJsonLocationsMap().get(jsonPath);
     }
     public Pair<JsonLocation, JsonLocation> getJsonLocationRange(URL fileURL, String jsonPath) {
         if(jsonContextMap.containsKey(fileURL)) {
-            return jsonContextMap.get(fileURL).getJsonLocationsContext().getLocations().get(jsonPath);
+            return jsonContextMap.get(fileURL).getJsonLocationsMap().get(jsonPath);
         }
         return null;
     }

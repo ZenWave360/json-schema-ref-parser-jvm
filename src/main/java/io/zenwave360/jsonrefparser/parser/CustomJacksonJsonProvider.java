@@ -27,6 +27,8 @@ class CustomJacksonJsonProvider extends JacksonJsonProvider {
         super(objectMapper, objectReader);
     }
 
+
+
     public boolean isArray(Object obj) {
         log.trace("isArray {}", obj != null? obj.getClass() : null);
         return (obj instanceof List) || (obj instanceof Map && ((Map<String, ?>) obj).keySet().stream().allMatch(key -> NumberUtils.isDigits(key)));
