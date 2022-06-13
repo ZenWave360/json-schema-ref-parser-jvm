@@ -53,7 +53,7 @@ Solution:
 ```java
 File file = new File("src/test/resources/openapi/allOf.yml");
 $RefParser parser = new $RefParser(file);
-$Refs refs = parser.dereference().mergeAllOf().getRefs();
+$Refs refs = parser.parse().dereference().mergeAllOf().getRefs();
 Object resultMapOrList = refs.schema();
 ```
 
@@ -62,7 +62,7 @@ Skip (leave unresolved) circular references:
 ```java
 $RefParser parser = new $RefParser(file)
         .withOptions(new $RefParserOptions().withOnCircular(SKIP));
-$Refs refs = parser.dereference().getRefs();
+$Refs refs = parser.parse().dereference().getRefs();
 Assert.assertFalse(refs.circular);
 
 ```
@@ -76,7 +76,7 @@ $RefParser parser = new $RefParser(file)
                 .withHeader("Bearer", "<token>")
                 .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
         .withOptions(new $RefParserOptions().withOnCircular(SKIP));
-$Refs refs = parser.dereference().mergeAllOf().getRefs();
+$Refs refs = parser.parse().dereference().mergeAllOf().getRefs();
 ```
 
 Calculate json-path -> to file location range:
@@ -84,9 +84,8 @@ Calculate json-path -> to file location range:
 
 ```java
 File file = new File("src/test/resources/openapi/allOf.yml");
-$RefParser parser = new $RefParser(file);
-$Refs refs = parser.dereference().mergeAllOf().getRefs();
-Pair<JsonLocation, JsonLocation> locations = refs.getJsonLocationRange("$.info");
+$RefParser parser = new $RefParser(file).parse();
+Pair<JsonLocation, JsonLocation> locations = parser.getRefs().getJsonLocationRange("$.info");
 ```
 
 Installation:

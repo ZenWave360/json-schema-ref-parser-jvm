@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +30,11 @@ public class $RefParser {
 
     private static final Logger log = LoggerFactory.getLogger($RefParser.class);
 
+    public final File file;
     public final URL url;
+    public final String json;
 
-    public final $Refs refs;
+    public $Refs refs;
     public final Map<RefFormat, Resolver> resolvers = new HashMap<>();
     {
         resolvers.put(RefFormat.RELATIVE, new FileResolver());
@@ -42,15 +45,21 @@ public class $RefParser {
 
     private $RefParserOptions options;
 
-    public $RefParser(File file) throws IOException {
+    public $RefParser(File file) throws MalformedURLException {
+        this.file = file;
         this.url = file.toURI().toURL();
-        refs = new $Refs(Parser.parse(file), url);
+        this.json = null;
     }
 
+    public $RefParser(String json) throws MalformedURLException {
+        this.json = json;
+        this.file = null;
+        this.url = null;
+    }
 
-    public $RefParser(String json) {
-        refs = new $Refs(Parser.parse(json));
-        url = null;
+    public $RefParser parse() throws IOException {
+        refs = url != null? new $Refs(Parser.parse(file), url) : new $Refs(Parser.parse(json));
+        return this;
     }
 
     public $RefParser withAuthentication(AuthenticationValue authenticationValue) {

@@ -12,7 +12,7 @@ public class CustomJacksonProviderTest {
     @Test
     public void testAccesingIndexedJsonPathWithAndWithOutQuotes() throws IOException {
         File file = new File("src/test/resources/indexed-array.yml");
-        $RefParser parser = new $RefParser(file);
+        $RefParser parser = new $RefParser(file).parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Object firstServer = parser.refs.jsonContext.read(JsonPath.compile("$.servers[1]"));
         Object firstServerAsObjects = parser.refs.jsonContext.read(JsonPath.compile("$['servers']['1']"));
