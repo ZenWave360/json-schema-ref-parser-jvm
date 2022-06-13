@@ -12,7 +12,7 @@ Parse, Resolve, and Dereference JSON Schema $ref pointers
 
 This is a Java implementation of the wonderful Node.js [JSON Schema $Ref Parser](https://apitools.dev/json-schema-ref-parser/).
 
-It also calculates [json-path -> to file location range](#) for parsed files inspired in [@stoplight/yaml](https://github.com/stoplightio/yaml)
+It also calculates [json-path -> to file location range](#calculate-json-path---to-file-location-range) for parsed files inspired in [@stoplight/yaml](https://github.com/stoplightio/yaml)
 
 The Problem:
 --------------------------
@@ -80,6 +80,7 @@ $Refs refs = parser.dereference().mergeAllOf().getRefs();
 ```
 
 Calculate json-path -> to file location range:
+--------------------------
 
 ```java
 File file = new File("src/test/resources/openapi/allOf.yml");
