@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -24,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 public class Parser {
@@ -49,16 +51,13 @@ public class Parser {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
         JsonDeserializerWithLocations jsonDeserializerWithLocations = new JsonDeserializerWithLocations();
-        ObjectReader objectReader = new ObjectReader(mapper.reader().forType(Object.class), mapper.getDeserializationConfig()) {
-            @Override
-            protected JsonDeserializer<Object> _findRootDeserializer(DeserializationContext ctxt) throws JsonMappingException {
-                return jsonDeserializerWithLocations;
-            }
-        };
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Object.class, jsonDeserializerWithLocations);
+        mapper.registerModule(module);
 
         Configuration.setDefaults(new Configuration.Defaults() {
 
-            private final JsonProvider jsonProvider = new CustomJacksonJsonProvider(mapper, objectReader);
+            private final JsonProvider jsonProvider = new CustomJacksonJsonProvider(mapper);
             private final MappingProvider mappingProvider = new JacksonMappingProvider(mapper);
 
             @Override

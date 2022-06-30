@@ -23,8 +23,8 @@ class CustomJacksonJsonProvider extends JacksonJsonProvider {
 
     private Logger log = LoggerFactory.getLogger(CustomJacksonJsonProvider.class);
 
-    public CustomJacksonJsonProvider(ObjectMapper objectMapper, ObjectReader objectReader) {
-        super(objectMapper, objectReader);
+    public CustomJacksonJsonProvider(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
 
