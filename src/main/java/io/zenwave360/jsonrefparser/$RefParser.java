@@ -19,7 +19,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -97,14 +99,28 @@ public class $RefParser {
     private void mergeAllOf(ExtendedJsonContext jsonContext, Object value, String[] paths, URL currentFileURL) {
         if(paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
             List allOf = (List) value;
-            Map<String, Object> mergedAllOfObject = new HashMap<>();
+            List<String> required = new ArrayList<>();
+            Map<String, Object> properties = new LinkedHashMap<>();
+            Map<String, Object> mergedAllOfObject = new LinkedHashMap<>();
             for (int i = 0; i < allOf.size(); i++) {
                 if(allOf.get(i) instanceof Map) {
                     Map<String, Object> item = (Map<String, Object>) allOf.get(i);
                     mergedAllOfObject.putAll(item);
+                    if(item.containsKey("properties")) {
+                        properties.putAll((Map) item.get("properties"));
+                    }
+                    if(item.containsKey("required")) {
+                        required.addAll((List) item.get("required"));
+                    }
                 } else {
                     throw new RuntimeException("Could not understand allOf: " + allOf.get(i));
                 }
+            }
+            if(!required.isEmpty()) {
+                mergedAllOfObject.put("required", required);
+            }
+            if(!properties.isEmpty()) {
+                mergedAllOfObject.put("properties", properties);
             }
             String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
             String jsonPath = jsonPath(jsonPaths);
