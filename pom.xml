@@ -52,12 +52,12 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
 
-    <slf4j-api.version>1.7.30</slf4j-api.version>
+    <slf4j-api.version>1.7.36</slf4j-api.version>
 
     <jackson.version>2.12.6</jackson.version>
-    <snakeyaml.version>1.29</snakeyaml.version>
-    <json-path.version>2.6.0</json-path.version>
-    <jsonschema2pojo.version>1.1.1</jsonschema2pojo.version>
+    <snakeyaml.version>1.30</snakeyaml.version>
+    <json-path.version>2.7.0</json-path.version>
+    <jsonschema2pojo.version>1.1.2</jsonschema2pojo.version>
     <avro.version>1.8.2</avro.version>
     <freemaker.version>2.3.29</freemaker.version>
   </properties>
@@ -103,7 +103,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
