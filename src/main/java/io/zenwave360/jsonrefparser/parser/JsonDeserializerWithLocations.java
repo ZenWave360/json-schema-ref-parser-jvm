@@ -62,7 +62,6 @@ public class JsonDeserializerWithLocations extends UntypedObjectDeserializer {
     String getFullPathName(JsonParser jsonParser) throws IOException {
         List<String> paths = new ArrayList<>();
         var context = jsonParser.getParsingContext();
-        System.out.println("Context " + context.toString() + " - " + jsonParser.getCurrentLocation());
         if (context.inRoot()) {
             paths.add("$");
         } else {

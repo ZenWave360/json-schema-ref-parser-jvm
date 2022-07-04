@@ -54,7 +54,11 @@ Solution:
 ```java
 File file = new File("src/test/resources/openapi/allOf.yml");
 $RefParser parser = new $RefParser(file);
-$Refs refs = parser.parse().dereference().mergeAllOf().getRefs();
+$Refs refs = parser
+        .parse()
+        .dereference()
+        .mergeAllOf()
+        .getRefs();
 Object resultMapOrList = refs.schema();
 ```
 
@@ -86,7 +90,9 @@ Calculate json-path -> to file location range:
 ```java
 File file = new File("src/test/resources/openapi/allOf.yml");
 $RefParser parser = new $RefParser(file).parse();
-Pair<JsonLocation, JsonLocation> locations = parser.getRefs().getJsonLocationRange("$.info");
+Pair<JsonLocation, JsonLocation> locationRange = parser.getRefs().getJsonLocationRange("$.info");
+int startLine = locationRange.getLeft().getLineNr();
+int endLine = locationRange.getRight().getLineNr();
 ```
 
 Installation:
