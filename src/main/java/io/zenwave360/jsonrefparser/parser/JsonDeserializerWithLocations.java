@@ -19,12 +19,16 @@ import java.util.Map;
 import static com.fasterxml.jackson.core.JsonTokenId.ID_START_ARRAY;
 import static com.fasterxml.jackson.core.JsonTokenId.ID_START_OBJECT;
 
-public class JsonDeserializerWithLocations extends UntypedObjectDeserializer.Vanilla {
+public class JsonDeserializerWithLocations extends UntypedObjectDeserializer {
 
     private Map<String, Pair<JsonLocation, JsonLocation>> locations = new HashMap<>();
 
     public Map<String, Pair<JsonLocation, JsonLocation>> getLocations() {
         return locations;
+    }
+
+    JsonDeserializerWithLocations() {
+        super(null, null);
     }
 
     @Override
@@ -58,6 +62,7 @@ public class JsonDeserializerWithLocations extends UntypedObjectDeserializer.Van
     String getFullPathName(JsonParser jsonParser) throws IOException {
         List<String> paths = new ArrayList<>();
         var context = jsonParser.getParsingContext();
+        System.out.println("Context " + context.toString() + " - " + jsonParser.getCurrentLocation());
         if (context.inRoot()) {
             paths.add("$");
         } else {
