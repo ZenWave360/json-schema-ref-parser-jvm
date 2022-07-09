@@ -1,7 +1,5 @@
 package io.zenwave360.jsonrefparser;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.internal.JsonContext;
 import io.zenwave360.jsonrefparser.parser.ExtendedJsonContext;
 import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.jsonrefparser.resolver.FileResolver;
@@ -9,6 +7,7 @@ import io.zenwave360.jsonrefparser.resolver.HttpResolver;
 import io.zenwave360.jsonrefparser.resolver.RefFormat;
 import io.zenwave360.jsonrefparser.resolver.Resolver;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,14 +18,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.math.NumberUtils.isDigits;
 
 public class $RefParser {
 
@@ -42,7 +40,7 @@ public class $RefParser {
         resolvers.put(RefFormat.RELATIVE, new FileResolver());
         resolvers.put(RefFormat.URL, new HttpResolver());
     }
-    private Map<String, ExtendedJsonContext> cache = new HashMap<>();
+    private Map<String, ExtendedJsonContext> urlJsonContextCache = new HashMap<>();
     private List<AuthenticationValue> authenticationValues = new ArrayList<>();
 
     private $RefParserOptions options;
@@ -53,14 +51,20 @@ public class $RefParser {
         this.json = null;
     }
 
-    public $RefParser(String json) throws MalformedURLException {
+    public $RefParser(String json) {
         this.json = json;
         this.file = null;
         this.url = null;
     }
 
+    public $RefParser(String json, URL url) {
+        this.file = null;
+        this.url = url;
+        this.json = json;
+    }
+
     public $RefParser parse() throws IOException {
-        refs = url != null? new $Refs(Parser.parse(file), url) : new $Refs(Parser.parse(json));
+        refs = file != null? new $Refs(Parser.parse(file), url) : new $Refs(Parser.parse(json), url);
         return this;
     }
 
@@ -92,11 +96,11 @@ public class $RefParser {
 
     public $RefParser mergeAllOf() {
         this.refs.addPath(url);
-        mergeAllOf(refs.jsonContext, refs.schema(), new String[0], url);
+        mergeAllOf(refs.schema(), new String[0], url);
         return this;
     }
 
-    private void mergeAllOf(ExtendedJsonContext jsonContext, Object value, String[] paths, URL currentFileURL) {
+    private void mergeAllOf(Object value, String[] paths, URL currentFileURL) {
         if(paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
             List allOf = (List) value;
             List<String> required = new ArrayList<>();
@@ -125,7 +129,8 @@ public class $RefParser {
             String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
             String jsonPath = jsonPath(jsonPaths);
             try {
-                jsonContext.set(jsonPath, mergedAllOfObject);
+                refs.jsonContext.set(jsonPath, mergedAllOfObject);
+                refs.saveOriginalAllOf(mergedAllOfObject, allOf);
             } catch (Exception e){
                 log.error("Error setting jsonPath:{} in file:{}", jsonPath, currentFileURL.toExternalForm(), e);
                 throw e;
@@ -133,22 +138,34 @@ public class $RefParser {
         } else if(value instanceof Map) {
             // visit
             ((Map<String, Object>) value).entrySet().forEach(e -> {
-                mergeAllOf(jsonContext, e.getValue(), ArrayUtils.add(paths, e.getKey()), currentFileURL);
+                mergeAllOf(e.getValue(), ArrayUtils.add(paths, e.getKey()), currentFileURL);
             });
         } else if(value instanceof List) {
             // visit
             List list = (List) value;
             for (int i = 0; i < list.size(); i++) {
-                mergeAllOf(jsonContext, list.get(i), ArrayUtils.add(paths, i + ""), currentFileURL);
+                mergeAllOf(list.get(i), ArrayUtils.add(paths, i + ""), currentFileURL);
             }
         }
     }
 
+    private Set<String> visited = new HashSet<>();
+    private List<String> indent = new ArrayList<>();
+    private String indent() {
+        return StringUtils.join(indent, "");
+    }
     private void dereference(ExtendedJsonContext jsonContext, Object value, String[] paths, URL currentFileURL) {
-         if(paths.length > 0 && "$ref".equals(paths[paths.length -1])) {
+        var visitedNodeRef = String.format("%s%s", currentFileURL.toExternalForm(), jsonPointer(paths));
+        log.trace("{}visiting {}", indent(), visitedNodeRef);
+        if(visited.contains(visitedNodeRef)) {
+            log.trace("{}skipping visited {}", indent(), visitedNodeRef);
+            return;
+        }
+        visited.add(visitedNodeRef);
+        if(paths.length > 0 && "$ref".equals(paths[paths.length -1])) {
             $Ref $ref = $Ref.of((String) value, currentFileURL);
-            // check if is circular
-            if(jsonPointer(paths).startsWith($ref.getPath() + "") && ($ref.getUrl() == null || $ref.getUrl().equals(currentFileURL))) {
+            boolean isCircular = (jsonPointer(paths) + "/").startsWith($ref.getPath() + "/") && ($ref.getUrl() == null || $ref.getUrl().equals(currentFileURL));
+            if(isCircular) {
                 if(options != null && $RefParserOptions.OnCircular.FAIL == options.onCircular) {
                     throw new RuntimeException("Failing: Circular references not allowed " + $ref);
                 }
@@ -156,17 +173,36 @@ public class $RefParser {
                     return;
                 }
                 this.refs.circular = true;
+                boolean isSelfReferencing = (jsonPointer(paths)).equals($ref.getPath() + "/$ref");
+                if(isSelfReferencing) {
+                    log.debug("{}Skipping self referencing reference [TODO: implement this] {}", indent(), $ref);
+                }
             }
 
+
             // do dereference
-            Object resolved = dereference($ref, jsonContext);
-            this.refs.saveOriginalRef($ref, resolved);
-            String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
-            String jsonPath = jsonPath(jsonPaths);
+            String[] innerJsonPaths = Arrays.copyOf(paths, paths.length -1);
+            String innerJsonPath = jsonPath(innerJsonPaths);
+            indent.add("->  ");
+            log.trace("{}resolving {} for {}", indent(), $ref, visitedNodeRef);
+            Object resolved = dereference($ref, jsonContext, currentFileURL);
+            indent.remove(indent.size() -1);
+            // dereference resolved
+            var resolvedRefURL = ObjectUtils.firstNonNull($ref.getUrl(), currentFileURL);
+            var resolvedNodePaths = jsonPointerToPaths($ref.getPath());
+            var resolvedNodeRef =  String.format("%s%s", resolvedRefURL.toExternalForm(), $ref.getPath());
+            indent.add(" => ");
+            log.trace("{}dereferencing resolved {}", indent(), resolvedNodeRef);
+            dereference(jsonContext, resolved, resolvedNodePaths, resolvedRefURL);
+            indent.remove(indent.size() -1);
+
             try {
-                jsonContext.set(jsonPath, resolved);
+                log.trace("{}setting resolved value at {} {}", indent(), innerJsonPath, currentFileURL);
+                resolved = dereference($ref, jsonContext, currentFileURL);
+                this.refs.saveOriginalRef($ref, resolved);
+                jsonContext.set(innerJsonPath, resolved);
             }catch (Exception e){
-                log.error("Error setting jsonPath: {} in {}", jsonPath,  currentFileURL.toExternalForm(), e);
+                log.error("Error setting jsonPath: {} in {}", innerJsonPath,  currentFileURL.toExternalForm(), e);
                 throw e;
             }
         } else if(value instanceof Map) {
@@ -183,25 +219,25 @@ public class $RefParser {
         }
     }
 
-    private Object dereference($Ref $ref, ExtendedJsonContext jsonContext) {
+    private Object dereference($Ref $ref, ExtendedJsonContext jsonContext, URL currentFileURL)  {
         this.refs.addRef($ref.getRef());
         // resolve external file
         if($ref.getRefFormat().isAnExternalRefFormat()) {
             this.refs.addPath($ref.getUrl());
             String refUrl = $ref.getUrl().toExternalForm();
-            if(cache.containsKey(refUrl)) {
-                jsonContext = cache.get(refUrl);
+            if(urlJsonContextCache.containsKey(refUrl)) {
+                jsonContext = urlJsonContextCache.get(refUrl);
             } else {
                 Resolver resolver = resolvers.get($ref.getRefFormat());
                 String resolved = resolver.resolve($ref);
                 jsonContext = Parser.parse(resolved);
-                cache.put(refUrl, jsonContext);
+                urlJsonContextCache.put(refUrl, jsonContext);
                 this.refs.addJsonContext($ref.getUrl(), jsonContext);
                 if(jsonContext.json() instanceof Map || jsonContext.json() instanceof List) {
+                    // log.trace("dereferencing resolved {}", $ref);
                     dereference(jsonContext, jsonContext.json(), new String[0], $ref.getUrl());
                 }
             }
-
         }
         // resolve internal path
         if(StringUtils.isNotBlank($ref.getPath())) {
@@ -223,6 +259,24 @@ public class $RefParser {
     }
 
     private String jsonPointer(String[] paths) {
-        return "#/" + StringUtils.join(paths, "/");
+        return "#/" + Arrays.stream(paths)
+                .map(path -> path
+                    .replace("~", "~0")
+                    .replace("/", "~1")
+                    .replace("\\", "\\\\")
+                    .replace("\"", "\\\""))
+                .collect(Collectors.joining("/"));
+    }
+
+    private String[] jsonPointerToPaths(String jsonPointer) {
+        if(jsonPointer == null) {
+            return new String[0];
+        }
+        return Arrays.stream(jsonPointer.replaceFirst("^#/", "")
+                .split("/")).map(path -> path
+                .replace("~0", "~")
+                .replace("~1", "/")
+                .replace("\\\\", "\\")
+                .replace("\\\"", "\"")).collect(Collectors.toList()).toArray(new String[0]);
     }
 }

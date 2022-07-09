@@ -45,3 +45,35 @@ components:
               type: boolean
             age:
               type: integer
+    CatPaginated:
+      allOf:
+        - $ref: "#/components/schemas/Page"
+        - properties:
+            content:
+              items:
+                $ref: "#/components/schemas/Cat"
+              type: "array"
+    Page:
+      type: object
+      required:
+        - "content"
+        - "totalElements"
+        - "totalPages"
+        - "size"
+        - "number"
+      properties:
+        number:
+          type: integer
+          minimum: 0
+        numberOfElements:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 0
+          maximum: 200
+          multipleOf: 25
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer

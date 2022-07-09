@@ -31,6 +31,7 @@ public class $Refs {
 
     // References are kept on a list (instead of a Map) because Map.hashCode() is calculated recursively and may be circular references.
     private List<Pair<$Ref, Object>> originalRefsList = new ArrayList<>();
+    private List<Pair<Map, List>> originalAllOfList = new ArrayList<>();
 
     public $Refs(ExtendedJsonContext jsonContext) {
         this.jsonContext = jsonContext;
@@ -58,10 +59,35 @@ public class $Refs {
     }
 
     public $Ref getOriginalRef(Object obj) {
+        Object originalAllOf = getOriginalAllOf(obj);
         return originalRefsList.stream()
-                .filter(pair -> pair.getValue() == obj)
+                .filter(pair -> isOriginalRef(obj, pair.getValue(), originalAllOf))
                 .map(pair -> pair.getKey())
                 .findFirst().orElse(null);
+    }
+
+    public Object getObjectForRef($Ref ref) {
+        return originalRefsList.stream()
+                .filter(pair -> pair.getKey().toString().equals(ref.toString()))
+                .map(Pair::getValue).findFirst().orElse(null);
+    }
+
+    public List<Map<String, Object>> getOriginalAllOf(Object resolvedAllOf) {
+        return originalAllOfList.stream().filter(pair -> pair.getKey() == resolvedAllOf).map(Pair::getValue).findFirst().orElse(null);
+    }
+
+    protected boolean isOriginalRef(Object value, Object savedValue, Object originalAllOf) {
+        return value == savedValue || (originalAllOf != null && savedValue instanceof Map && ((Map<?, ?>) savedValue).get("allOf") == originalAllOf);
+    }
+
+    private $Ref getOriginalRefForAllOf(Object resolvedAllOf) {
+        if(resolvedAllOf instanceof Map) {
+            Object originalAllOf = getOriginalAllOf((Map<String, Object>) resolvedAllOf);
+            if(originalAllOf != null) {
+
+            }
+        }
+        return null;
     }
 
     public void addRef(String ref) {
@@ -81,12 +107,13 @@ public class $Refs {
     }
 
     public void saveOriginalRef($Ref originalRef, Object resolved) {
-//        if(this.circular) {
-//            return;
-//        }
         if(!originalRef.equals(resolved)) {
             this.originalRefsList.add(Pair.of(originalRef, resolved));
         }
+    }
+
+    public void saveOriginalAllOf(Map<String, Object> resolvedAllOf, List originalAllOf) {
+        originalAllOfList.add(Pair.of(resolvedAllOf, originalAllOf));
     }
 
     public Map<String, Object> schema() {

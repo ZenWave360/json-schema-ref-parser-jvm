@@ -1,6 +1,7 @@
 package io.zenwave360.jsonrefparser;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -23,6 +24,15 @@ public class ParserTest {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     }
 
+    private void assertNoRefs(Object object) throws JsonProcessingException {
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        boolean hasRefs = json.contains("$ref");
+        if(hasRefs) {
+            System.out.println(json);
+        }
+        Assert.assertFalse(hasRefs);
+    }
+
     @Test
     public void testDereferenceAsyncapiNestedSchemas() throws IOException {
         File file = new File("src/test/resources/asyncapi/schemas/json-schemas-payload.yml");
@@ -33,6 +43,7 @@ public class ParserTest {
         Assert.assertFalse(refs.refs("#/").isEmpty());
         Assert.assertTrue(refs.get("$.components.messages.People") != null);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -42,6 +53,7 @@ public class ParserTest {
         $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -51,6 +63,7 @@ public class ParserTest {
         $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -71,6 +84,7 @@ public class ParserTest {
         Assert.assertEquals(17, avroLocations.getRight().getLineNr());
         Assert.assertEquals(6, avroLocations.getRight().getColumnNr());
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -93,6 +107,7 @@ public class ParserTest {
         $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -102,6 +117,7 @@ public class ParserTest {
         $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -109,17 +125,29 @@ public class ParserTest {
         File file = new File("src/test/resources/openapi/allOf.yml");
         $RefParser parser = new $RefParser(file).parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
-        Assert.assertFalse(refs.circular);
+//        Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
+    }
+
+    @Test
+    public void testDereference() throws IOException {
+        File file = new File("src/test/resources/openapi/allOf.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().getRefs();
+        Assert.assertFalse(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
     public void testDereferenceHttpRefs() throws IOException {
         File file = new File("src/test/resources/openapi/http-external-refs.yml");
-        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular(SKIP)).parse();
-        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        $RefParser parser = new $RefParser(file);
+        $Refs refs = parser.parse().dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -130,6 +158,7 @@ public class ParserTest {
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -144,6 +173,7 @@ public class ParserTest {
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -158,6 +188,7 @@ public class ParserTest {
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
     @Test
@@ -187,4 +218,33 @@ public class ParserTest {
         }
     }
 
+    @Test
+    public void testDereferenceRecursive() throws IOException {
+        File file = new File("src/test/resources/recursive/main.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().getRefs();
+        Assert.assertTrue(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+//        assertNoRefs(refs.schema());
+    }
+
+    @Test
+    public void testDereferenceCircular() throws IOException {
+        File file = new File("src/test/resources/recursive/auxiliar.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().getRefs();
+        Assert.assertTrue(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+//        assertNoRefs(refs.schema());
+    }
+
+    @Test
+    public void testDereferenceRecursiveSimplest() throws IOException {
+        File file = new File("src/test/resources/recursive/recursive-simplest.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().getRefs();
+        Assert.assertTrue(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        //        assertNoRefs(refs.schema());
+    }
 }

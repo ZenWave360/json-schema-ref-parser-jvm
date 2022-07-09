@@ -1,0 +1,9 @@
+info:
+  description: auxiliar.yml
+  recursive:
+    $ref: '#/responses/200'
+responses:
+  200:
+    description: 200
+    items:
+      $ref: '#/responses/200'
