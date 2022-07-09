@@ -8,7 +8,7 @@
         </encoder>
     </appender>
 
-    <logger name="io.zenwave360" level="trace"/>
+    <logger name="io.zenwave360" level="debug"/>
     <logger name="io.zenwave360.jsonrefparser.parser.CustomJacksonJsonProvider" level="debug" />
 
     <root level="WARN">
