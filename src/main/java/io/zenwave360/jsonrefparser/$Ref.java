@@ -3,30 +3,32 @@ package io.zenwave360.jsonrefparser;
 import io.zenwave360.jsonrefparser.resolver.RefFormat;
 import org.apache.commons.lang3.StringUtils;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class  $Ref {
     public static final String REFERENCE_SEPARATOR = "#/";
 
     private final String ref;
     private final RefFormat refFormat;
-    private final URL url;
+    private final URI uri;
     private final String path;
-    private final URL referencingFileURL;
+    private final URI referencingFileURI;
 
-    private $Ref(String ref, RefFormat refFormat, URL url, String path, URL referencingFileURL) {
+    private $Ref(String ref, RefFormat refFormat, URI uri, String path, URI referencingFileURI) {
         this.ref = ref;
         this.refFormat = refFormat;
-        this.url = url;
+        this.uri = uri;
         this.path = path;
-        this.referencingFileURL = referencingFileURL;
+        this.referencingFileURI = referencingFileURI;
     }
 
-    public static $Ref of(String ref, URL referencingFileURL) {
+    public static $Ref of(String ref, URI referencingFileURL) {
         RefFormat refFormat = RefFormat.INTERNAL;
         ref = mungedRef(ref);
-        if(ref.startsWith("http")||ref.startsWith("https")) {
+        if (ref.startsWith("classpath:")) {
+            refFormat = RefFormat.CLASSPATH;
+        } else if(ref.startsWith("http")||ref.startsWith("https")) {
             refFormat = RefFormat.URL;
         } else if(ref.startsWith(REFERENCE_SEPARATOR)) {
             refFormat = RefFormat.INTERNAL;
@@ -34,18 +36,14 @@ public class  $Ref {
             refFormat = RefFormat.RELATIVE;
         }
 
-        URL url = null;
+        URI url = null;
         String path = null;
         if(RefFormat.INTERNAL == refFormat) {
             path = ref;
         } else {
             String[] tokens = ref.split(REFERENCE_SEPARATOR, 2);
-            String urlStr = RefFormat.RELATIVE == refFormat? buildUrl(referencingFileURL.toExternalForm(), tokens[0]) : tokens[0];
-            try {
-                url = new URL(urlStr);
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
+            String urlStr = RefFormat.RELATIVE == refFormat? buildUrl(referencingFileURL.toString(), tokens[0]) : tokens[0];
+            url = URI.create(urlStr);
             if(tokens.length == 2) {
                 path = REFERENCE_SEPARATOR + tokens[1];
             }
@@ -63,21 +61,21 @@ public class  $Ref {
         return refFormat;
     }
 
-    public URL getUrl() {
-        return url;
+    public URI getURI() {
+        return uri;
     }
 
     public String getPath() {
         return path;
     }
 
-    public URL getReferencingFileURL() {
-        return referencingFileURL;
+    public URI getReferencingFileURI() {
+        return referencingFileURI;
     }
 
     @Override
     public String toString() {
-        return "$Ref {" + (url != null? url.toExternalForm() : "") + path + '}';
+        return "$Ref {" + (uri != null? uri.toString() : "") + path + '}';
     }
 
     @Override

@@ -1,13 +1,7 @@
 package io.zenwave360.jsonrefparser.resolver;
 
 import io.zenwave360.jsonrefparser.$Ref;
-import io.zenwave360.jsonrefparser.$RefParser;
-import io.zenwave360.jsonrefparser.$RefParserOptions;
-import io.zenwave360.jsonrefparser.$Refs;
 import io.zenwave360.jsonrefparser.AuthenticationValue;
-import io.zenwave360.jsonrefparser.parser.Parser;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +13,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -32,7 +24,6 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
@@ -55,7 +46,7 @@ public class HttpResolver implements Resolver {
     @Override
     public String resolve($Ref $ref) {
         try {
-            return urlToString($ref.getUrl().toExternalForm(), authenticationValues);
+            return downloadUrlToString($ref.getURI().toString(), authenticationValues);
         } catch (Exception e) {
             log.error("Error resolving {}", $ref, e);
             throw new RuntimeException(e);
@@ -71,7 +62,7 @@ public class HttpResolver implements Resolver {
 //        return temp;
 //    }
 
-    protected String urlToString(String url, List<AuthenticationValue> auths) throws Exception {
+    protected String downloadUrlToString(String url, List<AuthenticationValue> auths) throws Exception {
         InputStream is = null;
         BufferedReader br = null;
 

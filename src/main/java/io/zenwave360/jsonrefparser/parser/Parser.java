@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,14 @@ import java.util.Set;
 public class Parser {
 
     private static final Logger log = LoggerFactory.getLogger(Parser.class);
+
+    public static ExtendedJsonContext parse(URI uri) throws IOException {
+        if("classpath".contentEquals(uri.getScheme())) {
+            return parse(Parser.class.getResourceAsStream(uri.getPath()));
+        }
+        // TODO: it does not support yet parsing http/https files directly
+        return parse(new FileInputStream(new File(uri)));
+    }
 
     public static ExtendedJsonContext parse(File file) throws IOException {
         return parse(new FileInputStream(file));

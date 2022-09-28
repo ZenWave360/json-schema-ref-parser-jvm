@@ -7,6 +7,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,10 +26,10 @@ public class $Refs {
 
     public ExtendedJsonContext jsonContext;
 
-    private Map<URL, ExtendedJsonContext> jsonContextMap = new HashMap<>();
+    private Map<URI, ExtendedJsonContext> jsonContextMap = new HashMap<>();
 
-    public final URL file;
-    public final URL rootDir;
+    public final URI file;
+    public final URI rootDir;
 
     // References are kept on a list (instead of a Map) because Map.hashCode() is calculated recursively and may be circular references.
     private List<Pair<$Ref, Object>> originalRefsList = new ArrayList<>();
@@ -36,22 +38,15 @@ public class $Refs {
     public $Refs(ExtendedJsonContext jsonContext) {
         this.jsonContext = jsonContext;
         this.file = null;
-        try {
-            this.rootDir = new File(".").toURI().toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        this.rootDir = new File(".").toURI();
     }
 
-    public $Refs(ExtendedJsonContext jsonContext, URL file) {
+    public $Refs(ExtendedJsonContext jsonContext, URI file) {
         this.jsonContext = jsonContext;
         this.file = file;
-        String parentFile = FilenameUtils.getFullPath(file.toExternalForm()) + (file.getQuery() != null? "?" + file.getQuery() : "");
-        try {
-            this.rootDir = new URL(parentFile);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        FilenameUtils.getFullPath(file.toString());
+        String parentFile = FilenameUtils.getFullPath(file.toString()) + (file.getQuery() != null? "?" + file.getQuery() : "");
+        this.rootDir = URI.create(parentFile);
     }
 
     public List<Pair<$Ref, Object>> getOriginalRefsList() {
@@ -102,7 +97,13 @@ public class $Refs {
         }
     }
 
-    public void addJsonContext(URL url, ExtendedJsonContext jsonContext) {
+    public void addPath(URI uri) {
+        if(uri != null && !this.paths.contains(uri.toString())) {
+            this.paths.add(uri.toString());
+        }
+    }
+
+    public void addJsonContext(URI url, ExtendedJsonContext jsonContext) {
         jsonContextMap.put(url, jsonContext);
     }
 
@@ -146,9 +147,9 @@ public class $Refs {
     public Pair<JsonLocation, JsonLocation> getJsonLocationRange(String jsonPath) {
         return jsonContext.getJsonLocationsMap().get(jsonPath);
     }
-    public Pair<JsonLocation, JsonLocation> getJsonLocationRange(URL fileURL, String jsonPath) {
-        if(jsonContextMap.containsKey(fileURL)) {
-            return jsonContextMap.get(fileURL).getJsonLocationsMap().get(jsonPath);
+    public Pair<JsonLocation, JsonLocation> getJsonLocationRange(URI fileURI, String jsonPath) {
+        if(jsonContextMap.containsKey(fileURI)) {
+            return jsonContextMap.get(fileURI).getJsonLocationsMap().get(jsonPath);
         }
         return null;
     }

@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 
 import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.FAIL;
 import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
@@ -57,6 +59,16 @@ public class ParserTest {
     }
 
     @Test
+    public void testDereferenceAsyncapiNestedSchemasExternalRef_with_ClasspathResolver() throws IOException {
+        URI url = URI.create("classpath:/asyncapi/schemas/json-schemas-external-ref.yml");
+        $RefParser parser = new $RefParser(url).parse();
+        $Refs refs = parser.dereference().getRefs();
+        Assert.assertFalse(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
+    }
+
+    @Test
     public void testDereferenceAsyncapiShoppingCartWithAvros() throws IOException {
         File file = new File("src/test/resources/asyncapi/shoping-cart-multiple-files/shoping-cart-multiple-files.yml");
         $RefParser parser = new $RefParser(file).parse();
@@ -78,7 +90,7 @@ public class ParserTest {
         Assert.assertEquals(18, serverLocations.getRight().getLineNr());
         Assert.assertEquals(1, serverLocations.getRight().getColumnNr());
         File avro = new File("src/test/resources/asyncapi/shoping-cart-multiple-files/add_cart_lines.avsc");
-        var avroLocations = refs.getJsonLocationRange(avro.toURI().toURL(), "$.fields");
+        var avroLocations = refs.getJsonLocationRange(avro.toURI(), "$.fields");
         Assert.assertEquals(6, avroLocations.getLeft().getLineNr());
         Assert.assertEquals(15, avroLocations.getLeft().getColumnNr());
         Assert.assertEquals(17, avroLocations.getRight().getLineNr());

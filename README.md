@@ -82,6 +82,16 @@ $RefParser parser = new $RefParser(file)
                 .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
         .withOptions(new $RefParserOptions().withOnCircular(SKIP));
 $Refs refs = parser.parse().dereference().mergeAllOf().getRefs();
+Object resultMapOrList = refs.schema();
+```
+
+From classpath:
+
+```java
+URI uri = URI.create("classpath:/asyncapi/schemas/json-schemas-external-ref.yml");
+$RefParser parser = new $RefParser(uri);
+$Refs refs = parser.parse().dereference().mergeAllOf().getRefs();
+Object resultMapOrList = refs.schema();
 ```
 
 Calculate json-path -> to file location range:
@@ -108,10 +118,11 @@ Installation:
 Features
 --------------------------
 - Use JSON, YAML or even Avro Schemas (avsc) — or even a mix of them!
-- Fully derefence your schema producing a simple Map of nodes
+- Fully dereference your schema producing a simple Map of nodes
 - Caching: Results from remote URIs and local references are cached.
 - Reference equality: Maintains object reference equality — $ref pointers to the same value always resolve to the same object instance
 - Flexible: Bring your own readers for http://, file://, or use default ones.
+- It even supports loading files from the classpath!
 - Authentication: Configure authentication headers or query parameters with url matchers.
 - Circular references: Detects circular references, and you can `resolve` them, `skip` leaving unresolved or just `fail`.
 - Merge `allOf` references into a single object.
