@@ -54,6 +54,10 @@ public class $RefParser {
     }
 
     public $RefParser(URI uri) {
+        if(uri.toString().startsWith("classpath:") && !uri.toString().startsWith("classpath:/")) {
+            // gracefully handle classpath: without the slash
+            uri = URI.create(uri.toString().replace("classpath:", "classpath:/"));
+        }
         this.uri = uri;
         this.file = null;
         this.json = null;

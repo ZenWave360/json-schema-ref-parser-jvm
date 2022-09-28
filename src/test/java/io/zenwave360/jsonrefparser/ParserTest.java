@@ -69,6 +69,16 @@ public class ParserTest {
     }
 
     @Test
+    public void testDereferenceAsyncapiNestedSchemasExternalRef_with_ClasspathResolver_NoSlash() throws IOException {
+        URI url = URI.create("classpath:asyncapi/schemas/json-schemas-external-ref.yml");
+        $RefParser parser = new $RefParser(url).parse();
+        $Refs refs = parser.dereference().getRefs();
+        Assert.assertFalse(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
+    }
+
+    @Test
     public void testDereferenceAsyncapiShoppingCartWithAvros() throws IOException {
         File file = new File("src/test/resources/asyncapi/shoping-cart-multiple-files/shoping-cart-multiple-files.yml");
         $RefParser parser = new $RefParser(file).parse();
