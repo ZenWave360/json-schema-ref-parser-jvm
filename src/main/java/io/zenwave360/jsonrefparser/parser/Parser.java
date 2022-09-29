@@ -16,6 +16,7 @@ import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
+import io.zenwave360.jsonrefparser.resolver.ClasspathResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +34,16 @@ public class Parser {
 
     private static final Logger log = LoggerFactory.getLogger(Parser.class);
 
+    private static ClassLoader resourceClassLoader = Parser.class.getClassLoader();
+    public static void withResourceClassLoader(ClassLoader resourceClassLoader) {
+        if(resourceClassLoader != null) {
+            Parser.resourceClassLoader = resourceClassLoader;
+        }
+    }
+
     public static ExtendedJsonContext parse(URI uri) throws IOException {
         if("classpath".contentEquals(uri.getScheme())) {
-            return parse(Parser.class.getResourceAsStream(uri.getPath()));
+            return parse(resourceClassLoader.getResourceAsStream(uri.getPath().replaceFirst("^/", "")));
         }
         // TODO: it does not support yet parsing http/https files directly
         return parse(new FileInputStream(new File(uri)));

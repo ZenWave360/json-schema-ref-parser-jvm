@@ -61,7 +61,7 @@ public class ParserTest {
     @Test
     public void testDereferenceAsyncapiNestedSchemasExternalRef_with_ClasspathResolver() throws IOException {
         URI url = URI.create("classpath:/asyncapi/schemas/json-schemas-external-ref.yml");
-        $RefParser parser = new $RefParser(url).parse();
+        $RefParser parser = new $RefParser(url).withResourceClassLoader(getClass().getClassLoader()).parse();
         $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
@@ -71,7 +71,7 @@ public class ParserTest {
     @Test
     public void testDereferenceAsyncapiNestedSchemasExternalRef_with_ClasspathResolver_NoSlash() throws IOException {
         URI url = URI.create("classpath:asyncapi/schemas/json-schemas-external-ref.yml");
-        $RefParser parser = new $RefParser(url).parse();
+        $RefParser parser = new $RefParser(url).withResourceClassLoader(getClass().getClassLoader()).parse();
         $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));

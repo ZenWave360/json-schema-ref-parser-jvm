@@ -35,6 +35,8 @@ public class $RefParser {
     public final URI uri;
     public final String json;
 
+    private ClassLoader resourceClassLoader;
+
     public $Refs refs;
     public final Map<RefFormat, Resolver> resolvers = new HashMap<>();
     {
@@ -58,8 +60,13 @@ public class $RefParser {
             // gracefully handle classpath: without the slash
             uri = URI.create(uri.toString().replace("classpath:", "classpath:/"));
         }
-        this.uri = uri;
-        this.file = null;
+        if(uri.getScheme() == null || uri.getScheme().length() == 1) { // file path (or windows drive letter)
+            this.file = new File(uri.toString());
+            this.uri = file.toURI();
+        } else {
+            this.uri = uri;
+            this.file = null;
+        }
         this.json = null;
     }
 
@@ -83,6 +90,16 @@ public class $RefParser {
             refs = new $Refs(Parser.parse(uri), uri);
         } else {
             refs = new $Refs(Parser.parse(json));
+        }
+        return this;
+    }
+
+    public $RefParser withResourceClassLoader(ClassLoader resourceClassLoader) {
+        this.resourceClassLoader = resourceClassLoader;
+        Parser.withResourceClassLoader(resourceClassLoader);
+        var classpathResolver = this.resolvers.get(RefFormat.CLASSPATH);
+        if(classpathResolver instanceof ClasspathResolver) {
+            ((ClasspathResolver) classpathResolver).withResourceClassLoader(resourceClassLoader);
         }
         return this;
     }
