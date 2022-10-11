@@ -15,6 +15,8 @@ This is a Java implementation of the wonderful Node.js [JSON Schema $Ref Parser]
 
 It also calculates [json-path -> to file location range](#calculate-json-path---to-file-location-range) for parsed files inspired in [@stoplight/yaml](https://github.com/stoplightio/yaml)
 
+It even supports loading files and references from the classpath! (just use `classpath:org/foo/bar.json`)
+
 The Problem:
 --------------------------
 
@@ -122,7 +124,7 @@ Features
 - Caching: Results from remote URIs and local references are cached.
 - Reference equality: Maintains object reference equality — $ref pointers to the same value always resolve to the same object instance
 - Flexible: Bring your own readers for http://, file://, or use default ones.
-- It even supports loading files from the classpath!
+- It even supports loading files and references from the classpath! (just use `classpath:org/foo/bar.json`)
 - Authentication: Configure authentication headers or query parameters with url matchers.
 - Circular references: Detects circular references, and you can `resolve` them, `skip` leaving unresolved or just `fail`.
 - Merge `allOf` references into a single object.
