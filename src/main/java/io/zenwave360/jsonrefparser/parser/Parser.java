@@ -43,25 +43,28 @@ public class Parser {
 
     public static ExtendedJsonContext parse(URI uri) throws IOException {
         if("classpath".contentEquals(uri.getScheme())) {
-            return parse(resourceClassLoader.getResourceAsStream(uri.getPath().replaceFirst("^/", "")));
+            return parse(resourceClassLoader.getResourceAsStream(uri.getPath().replaceFirst("^/", "")), uri);
         }
         // TODO: it does not support yet parsing http/https files directly
-        return parse(new FileInputStream(new File(uri)));
+        return parse(new FileInputStream(new File(uri)), uri);
     }
 
     public static ExtendedJsonContext parse(File file) throws IOException {
-        return parse(new FileInputStream(file));
+        return parse(new FileInputStream(file), file);
     }
 
     public static ExtendedJsonContext parse(String content) {
         try {
-            return parse(new ByteArrayInputStream(content.getBytes()));
+            return parse(new ByteArrayInputStream(content.getBytes()), "string");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static ExtendedJsonContext parse(InputStream inputStream) throws IOException {
+    public static ExtendedJsonContext parse(InputStream inputStream, Object source) throws IOException {
+        if (inputStream == null) {
+            throw new IllegalArgumentException("$RefParser.parse(): InputStream not found [" + source + "]");
+        }
         ObjectMapper mapper = new ObjectMapper(new CustomYAMLFactory());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
