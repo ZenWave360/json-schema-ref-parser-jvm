@@ -36,6 +36,15 @@ public class ParserTest {
         Assert.assertFalse(hasRefs);
     }
 
+    private void assertNoAllOfs(Object object) throws JsonProcessingException {
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        boolean hasRefs = json.contains("allOf");
+        if(hasRefs) {
+            System.out.println(json);
+        }
+        Assert.assertFalse(hasRefs);
+    }
+
     @Test
     public void testDereferenceAsyncapiNestedSchemas() throws IOException {
         File file = new File("src/test/resources/asyncapi/schemas/json-schemas-payload.yml");
@@ -272,12 +281,14 @@ public class ParserTest {
     }
 
     @Test
+    @Ignore
     public void testMergeAllOfRecursive() throws IOException {
         File file = new File("src/test/resources/asyncapi/orders-model.yml");
         $RefParser parser = new $RefParser(file).parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
-        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
-        //        assertNoRefs(refs.schema());
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
+        assertNoAllOfs(refs.schema());
     }
 
     @Test

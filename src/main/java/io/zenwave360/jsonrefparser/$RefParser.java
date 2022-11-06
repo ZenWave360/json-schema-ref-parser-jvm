@@ -139,13 +139,13 @@ public class $RefParser {
     }
 
     private void mergeAllOf(Object value, String[] paths, URI currentFileURL) {
-        var visitedNodeRef = String.format("%s%s", currentFileURL.toString(), jsonPointer(paths));
-        log.trace("{}visiting {}", indent(), visitedNodeRef);
-        if(visited.contains(value)) {
-            log.trace("{}skipping visited {}", indent(), visitedNodeRef);
-            return;
-        }
-        visited.add(value);
+//        var visitedNodeRef = String.format("%s%s", currentFileURL.toString(), jsonPointer(paths));
+//        log.trace("{}visiting {}", indent(), visitedNodeRef);
+//        if(visited.contains(value)) {
+//            log.trace("{}skipping visited {}", indent(), visitedNodeRef);
+//            return;
+//        }
+//        visited.add(value);
         if(paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
             List allOf = (List) value;
             List<String> required = new ArrayList<>();
