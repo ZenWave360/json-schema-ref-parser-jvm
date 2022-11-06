@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.jsonrefparser.resolver.HttpResolver;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -269,4 +270,25 @@ public class ParserTest {
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
         //        assertNoRefs(refs.schema());
     }
+
+    @Test
+    public void testMergeAllOfRecursive() throws IOException {
+        File file = new File("src/test/resources/asyncapi/orders-model.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        //        assertNoRefs(refs.schema());
+    }
+
+    @Test
+    @Ignore
+    public void testDetectCircularRecursive() throws IOException {
+        File file = new File("src/test/resources/asyncapi/orders-model.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().getRefs();
+        Assert.assertTrue(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        //        assertNoRefs(refs.schema());
+    }
+
 }

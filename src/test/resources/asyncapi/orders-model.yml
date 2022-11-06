@@ -1,0 +1,20 @@
+asyncapi: 2.4.0
+
+components:
+  schemas:
+    CustomerOrder:
+      type: "object"
+      x-business-entity: "CustomerOrder"
+      properties:
+        orderedItems:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderedItem"
+    OrderedItem:
+      type: "object"
+      x-business-entity: "OrderedItem"
+      properties:
+        customerOrders:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/CustomerOrder"

@@ -126,17 +126,26 @@ public class $RefParser {
 
     public $RefParser dereference() {
         this.refs.addPath(uri);
+        this.visited.clear();
         dereference(refs.jsonContext, refs.schema(), new String[0], uri);
         return this;
     }
 
     public $RefParser mergeAllOf() {
         this.refs.addPath(uri);
+        this.visited.clear();
         mergeAllOf(refs.schema(), new String[0], uri);
         return this;
     }
 
     private void mergeAllOf(Object value, String[] paths, URI currentFileURL) {
+        var visitedNodeRef = String.format("%s%s", currentFileURL.toString(), jsonPointer(paths));
+        log.trace("{}visiting {}", indent(), visitedNodeRef);
+        if(visited.contains(value)) {
+            log.trace("{}skipping visited {}", indent(), visitedNodeRef);
+            return;
+        }
+        visited.add(value);
         if(paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
             List allOf = (List) value;
             List<String> required = new ArrayList<>();
@@ -185,7 +194,7 @@ public class $RefParser {
         }
     }
 
-    private Set<String> visited = new HashSet<>();
+    private List<Object> visited = new ArrayList<>();
     private List<String> indent = new ArrayList<>();
     private String indent() {
         return StringUtils.join(indent, "");
