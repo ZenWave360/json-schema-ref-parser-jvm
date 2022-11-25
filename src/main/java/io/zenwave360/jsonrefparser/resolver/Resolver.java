@@ -7,7 +7,13 @@ import java.net.URL;
 
 public interface Resolver {
 
-    String resolve($Ref $ref);
+    String resolve($Ref $ref) throws MissingResourceException;
+
+    class MissingResourceException extends RuntimeException {
+        public MissingResourceException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 
     default <T extends Resolver> T withAuthentication(AuthenticationValue authenticationValue) {
         return (T) this;

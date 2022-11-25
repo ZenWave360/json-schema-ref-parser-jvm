@@ -230,7 +230,15 @@ public class $RefParser {
             String innerJsonPath = jsonPath(innerJsonPaths);
             indent.add("->  ");
             log.trace("{}resolving {} for {}", indent(), $ref, visitedNodeRef);
-            Object resolved = dereference($ref, jsonContext, currentFileURL);
+            Object resolved = null;
+            try {
+                resolved = dereference($ref, jsonContext, currentFileURL);
+            } catch (Resolver.MissingResourceException e) {
+                if(options != null && $RefParserOptions.OnMissing.SKIP == options.onMissing) {
+                    return;
+                }
+                throw e;
+            }
             indent.remove(indent.size() -1);
             // dereference resolved
             var resolvedRefURL = ObjectUtils.firstNonNull($ref.getURI(), currentFileURL);

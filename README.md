@@ -96,6 +96,16 @@ $Refs refs = parser.parse().dereference().mergeAllOf().getRefs();
 Object resultMapOrList = refs.schema();
 ```
 
+Skip missing resources:
+
+```java
+URI uri = URI.create("src/test/resources/openapi/openapi-missing.yml");
+$RefParser parser = new $RefParser(uri)
+        .withOptions(new $RefParserOptions().withOnMissing(OnMissing.SKIP));
+$Refs refs = parser.parse().dereference().mergeAllOf().getRefs();
+Object resultMapOrList = refs.schema();
+```
+
 Calculate json-path -> to file location range:
 --------------------------
 

@@ -1,18 +1,17 @@
 package io.zenwave360.jsonrefparser;
 
 import com.fasterxml.jackson.core.JsonLocation;
+import com.jayway.jsonpath.PathNotFoundException;
 import io.zenwave360.jsonrefparser.parser.ExtendedJsonContext;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -155,11 +154,25 @@ public class $Refs {
     }
 
     public Object get(String $ref) {
-        return jsonContext.read($ref);
+        try {
+            return jsonContext.read($ref);
+        } catch (UndeclaredThrowableException e) {
+            if(e.getUndeclaredThrowable().getCause() instanceof PathNotFoundException) {
+                return null;
+            }
+            throw e;
+        }
     }
 
     public <T> T get(String $ref, Class<T> type) {
-        return jsonContext.read($ref, type);
+        try {
+            return jsonContext.read($ref, type);
+        } catch (UndeclaredThrowableException e) {
+            if(e.getUndeclaredThrowable().getCause() instanceof PathNotFoundException) {
+                return null;
+            }
+            throw e;
+        }
     }
 
     /**

@@ -1,0 +1,15 @@
+openapi: 3.0.0
+
+paths:
+  /product:
+    get:
+      operationId: getProduct
+      responses:
+        200:
+          $ref: 'missing.yaml#/responses/200'
+        201:
+          $ref: 'classpath:/notfound.yml'
+        500:
+          $ref: 'https://github.com/ZenWave360/missing.yaml#/responses/500'
+#        400:
+#          $ref: 'https://domain.not/missing.yaml#/responses/400'

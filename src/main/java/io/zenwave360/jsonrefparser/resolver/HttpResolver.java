@@ -13,6 +13,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.file.NoSuchFileException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -47,21 +49,13 @@ public class HttpResolver implements Resolver {
     public String resolve($Ref $ref) {
         try {
             return downloadUrlToString($ref.getURI().toString(), authenticationValues);
+        } catch (FileNotFoundException e) {
+            throw new MissingResourceException("File not found: " + $ref.getURI(), e);
         } catch (Exception e) {
             log.error("Error resolving {}", $ref, e);
             throw new RuntimeException(e);
         }
     }
-
-
-//    protected File downloadUrlToFile(String url, List<AuthenticationValue> auths) throws Exception {
-//        String filename = FilenameUtils.getName(url);
-//        String content = urlToString(url, auths);
-//        File temp = File.createTempFile(FilenameUtils.getBaseName(filename), FilenameUtils.getExtension(filename));
-//        FileUtils.writeStringToFile(temp, content, UTF_8);
-//        return temp;
-//    }
-
     protected String downloadUrlToString(String url, List<AuthenticationValue> auths) throws Exception {
         InputStream is = null;
         BufferedReader br = null;
@@ -134,7 +128,7 @@ public class HttpResolver implements Resolver {
             log.error("unable to read", e);
             throw e;
         } catch (Exception e) {
-            log.error("unable to read", e);
+            log.error("Unable to read url {} {}", e.getClass().getSimpleName(), e.getMessage());
             throw e;
         } finally {
             if (is != null) {

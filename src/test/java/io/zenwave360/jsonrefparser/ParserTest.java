@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
 import io.zenwave360.jsonrefparser.resolver.HttpResolver;
+import io.zenwave360.jsonrefparser.resolver.Resolver;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -14,10 +16,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 
 import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.FAIL;
-import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
 
 public class ParserTest {
 
@@ -186,7 +186,7 @@ public class ParserTest {
     public void testDereferenceHttpRefsSelfSignedCerts() throws IOException {
         System.setProperty(HttpResolver.TRUST_ALL, "true");
         File file = new File("src/test/resources/openapi/http-external-refs.yml");
-        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular(SKIP)).parse();
+        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP)).parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
@@ -200,7 +200,7 @@ public class ParserTest {
                 .withAuthentication(new AuthenticationValue()
                         .withHeader("Basic: ")
                         .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
-                .withOptions(new $RefParserOptions().withOnCircular(SKIP))
+                .withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP))
                 .parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
@@ -215,7 +215,7 @@ public class ParserTest {
                 .withAuthentication(new AuthenticationValue()
                         .withQueryParam("token", "blablabla")
                         .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
-                .withOptions(new $RefParserOptions().withOnCircular(SKIP))
+                .withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP))
                 .parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         Assert.assertFalse(refs.circular);
@@ -233,7 +233,7 @@ public class ParserTest {
         }
 
         {
-            $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular(SKIP)).parse();
+            $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP)).parse();
             $Refs refs = parser.dereference().getRefs();
             Assert.assertFalse(refs.circular);
 //            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
@@ -278,6 +278,27 @@ public class ParserTest {
         Assert.assertTrue(refs.circular);
         //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
         //        assertNoRefs(refs.schema());
+    }
+
+    @Test
+    public void testDereferenceOnMissingSkip() throws IOException {
+        File file = new File("src/test/resources/openapi/openapi-missing.yml");
+        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnMissing(OnMissing.SKIP)).parse();
+        $Refs refs = parser.dereference().getRefs();
+        Assert.assertEquals("missing.yaml#/responses/200", refs.get("$.paths./product.get.responses.200.$ref"));
+        Assert.assertEquals("https://github.com/ZenWave360/missing.yaml#/responses/500", refs.get("$.paths./product.get.responses.500.$ref"));
+    }
+
+    @Test
+    public void testDereferenceOnMissingFail() throws IOException {
+        File file = new File("src/test/resources/openapi/openapi-missing.yml");
+        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnMissing(OnMissing.FAIL)).parse();
+        try {
+            $Refs refs = parser.dereference().getRefs();
+            Assert.fail("Missing references should not be allowed");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof Resolver.MissingResourceException);
+        }
     }
 
     @Test

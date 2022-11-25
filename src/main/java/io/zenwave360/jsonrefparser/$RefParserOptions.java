@@ -6,8 +6,14 @@ public class $RefParserOptions {
         SKIP,
         FAIL
     }
+
+    public enum OnMissing {
+        SKIP,
+        FAIL
+    }
     
     public OnCircular onCircular = OnCircular.RESOLVE;
+    public OnMissing onMissing = OnMissing.FAIL;
 
     public $RefParserOptions() {
 
@@ -20,6 +26,11 @@ public class $RefParserOptions {
 
     public $RefParserOptions withOnCircular(OnCircular onCircular) {
         this.onCircular = onCircular;
+        return this;
+    }
+
+    public $RefParserOptions withOnMissing(OnMissing onMissing) {
+        this.onMissing = onMissing;
         return this;
     }
 
