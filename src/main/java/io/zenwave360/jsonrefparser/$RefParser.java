@@ -235,6 +235,7 @@ public class $RefParser {
                 resolved = dereference($ref, jsonContext, currentFileURL);
             } catch (Resolver.MissingResourceException e) {
                 if(options != null && $RefParserOptions.OnMissing.SKIP == options.onMissing) {
+                    log.warn("Skipping missing reference {}", $ref);
                     return;
                 }
                 throw e;
