@@ -139,7 +139,7 @@ public class $RefParser {
     }
 
     private void mergeAllOf(Object value, String[] paths, URI currentFileURL) {
-//        var visitedNodeRef = String.format("%s%s", currentFileURL.toString(), jsonPointer(paths));
+//        var visitedNodeRef = String.format("%s%s", currentFileURL, jsonPointer(paths));
 //        log.trace("{}visiting {}", indent(), visitedNodeRef);
 //        if(visited.contains(value)) {
 //            log.trace("{}skipping visited {}", indent(), visitedNodeRef);
@@ -177,7 +177,7 @@ public class $RefParser {
                 refs.jsonContext.set(jsonPath, mergedAllOfObject);
                 refs.saveOriginalAllOf(mergedAllOfObject, allOf);
             } catch (Exception e){
-                log.error("Error setting jsonPath:{} in file:{}", jsonPath, currentFileURL.toString(), e);
+                log.error("Error setting jsonPath:{} in file:{}", jsonPath, currentFileURL, e);
                 throw e;
             }
         } else if(value instanceof Map) {
@@ -200,7 +200,7 @@ public class $RefParser {
         return StringUtils.join(indent, "");
     }
     private void dereference(ExtendedJsonContext jsonContext, Object value, String[] paths, URI currentFileURL) {
-        var visitedNodeRef = String.format("%s%s", currentFileURL.toString(), jsonPointer(paths));
+        var visitedNodeRef = String.format("%s%s", currentFileURL, jsonPointer(paths));
         log.trace("{}visiting {}", indent(), visitedNodeRef);
         if(visited.contains(visitedNodeRef)) {
             log.trace("{}skipping visited {}", indent(), visitedNodeRef);
@@ -244,7 +244,7 @@ public class $RefParser {
             // dereference resolved
             var resolvedRefURL = ObjectUtils.firstNonNull($ref.getURI(), currentFileURL);
             var resolvedNodePaths = jsonPointerToPaths($ref.getPath());
-            var resolvedNodeRef =  String.format("%s%s", resolvedRefURL.toString(), $ref.getPath());
+            var resolvedNodeRef =  String.format("%s%s", resolvedRefURL, $ref.getPath());
             indent.add(" => ");
             log.trace("{}dereferencing resolved {}", indent(), resolvedNodeRef);
             dereference(jsonContext, resolved, resolvedNodePaths, resolvedRefURL);
@@ -256,7 +256,7 @@ public class $RefParser {
                 this.refs.saveOriginalRef($ref, resolved);
                 jsonContext.set(innerJsonPath, resolved);
             }catch (Exception e){
-                log.error("Error setting jsonPath: {} in {}", innerJsonPath,  currentFileURL.toString(), e);
+                log.error("Error setting jsonPath: {} in {}", innerJsonPath,  currentFileURL, e);
                 throw e;
             }
         } else if(value instanceof Map) {
