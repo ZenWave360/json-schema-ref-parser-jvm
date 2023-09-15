@@ -1,13 +1,19 @@
 JSON Schema $Ref Parser for the JVM
 =====================================
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360/json-schema-ref-parser-jvm.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360/json-schema-ref-parser-jvm)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/json-schema-ref-parser-jvm?logo=GitHub)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/releases)
-[![build](https://github.com/ZenWave360/json-schema-ref-parser-jvm/workflows/build/badge.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml)
-[![coverage](https://raw.githubusercontent.com/ZenWave360/json-schema-ref-parser-jvm/badges/jacoco.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml)
-[![branches coverage](https://raw.githubusercontent.com/ZenWave360/json-schema-ref-parser-jvm/badges/branches.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml)
-[![GitHub](https://img.shields.io/github/license/ZenWave360/json-schema-ref-parser-jvm)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/blob/main/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.kefasb/json-schema-ref-parser-jvm.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.kefasb/json-schema-ref-parser-jvm)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/kefasb/json-schema-ref-parser-jvm?logo=GitHub)](https://github.com/kefasb/json-schema-ref-parser-jvm/releases)
+[![build](https://github.com/kefasb/json-schema-ref-parser-jvm/workflows/build/badge.svg)](https://github.com/kefasb/json-schema-ref-parser-jvm/actions/workflows/build.yml)
+[![coverage](https://raw.githubusercontent.com/kefasb/json-schema-ref-parser-jvm/badges/jacoco.svg)](https://github.com/kefasb/json-schema-ref-parser-jvm/actions/workflows/build.yml)
+[![branches coverage](https://raw.githubusercontent.com/kefasb/json-schema-ref-parser-jvm/badges/branches.svg)](https://github.com/kefasb/json-schema-ref-parser-jvm/actions/workflows/build.yml)
+[![GitHub](https://img.shields.io/github/license/kefasb/json-schema-ref-parser-jvm)](https://github.com/kefasb/json-schema-ref-parser-jvm/blob/main/LICENSE)
 
+
+This is a fork of https://github.com/ZenWave360/json-schema-ref-parser-jvm
+
+Its purpose is to build the project for Java 8.
+
+--------------------------
 
 Parse, Resolve, and Dereference JSON Schema $ref pointers
 
@@ -121,9 +127,9 @@ Installation:
 --------------------------
 ```xml
 <dependency>
-  <groupId>io.github.zenwave360</groupId>
+  <groupId>io.github.kefasb</groupId>
   <artifactId>json-schema-ref-parser-jvm</artifactId>
-  <version>${json-schema-ref-parser-jvm.version}</version>
+  <version>0.6.3-8</version>
 </dependency>
 ```
 

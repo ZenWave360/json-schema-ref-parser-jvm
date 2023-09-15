@@ -3,13 +3,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.github.zenwave360</groupId>
+  <groupId>io.github.kefasb</groupId>
   <artifactId>json-schema-ref-parser-jvm</artifactId>
-  <version>0.8.3-SNAPSHOT</version>
+  <version>0.8.3-8-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>JSON Schema Ref Parser for Java</description>
-  <url>https://zenwave360.github.io/json-schema-ref-parser-jvm/</url>
+  <url>https://kefasb.github.io/json-schema-ref-parser-jvm/</url>
 
   <licenses>
     <license>
@@ -20,10 +20,9 @@
 
   <developers>
     <developer>
-      <name>Ivan Garcia Sainz-Aja</name>
-      <email>ivangsa@gmail.com</email>
-      <organization>ZenWave360</organization>
-      <organizationUrl>https://github.com/ZenWave360</organizationUrl>
+      <name>Piotr Borkowski</name>
+      <email>kefasb@gmail.com</email>
+      <organizationUrl>https://github.com/kefasb</organizationUrl>
     </developer>
   </developers>
 
@@ -41,16 +40,16 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:git:git://github.com/ZenWave360/json-schema-ref-parser-jvm.git</connection>
-    <developerConnection>scm:git:git@github.com:ZenWave360/ZenWave360.git</developerConnection>
-    <url>https://github.com/ZenWave360/json-schema-ref-parser-jvm/</url>
+    <connection>scm:git:git://github.com/kefasb/json-schema-ref-parser-jvm.git</connection>
+    <developerConnection>scm:git:git@github.com:kefasb/kefasb.git</developerConnection>
+    <url>https://github.com/kefasb/json-schema-ref-parser-jvm/</url>
     <tag>HEAD</tag>
   </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
 
     <slf4j-api.version>1.7.36</slf4j-api.version>
 
@@ -192,7 +191,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin><plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><configuration><source>8</source><target>8</target></configuration></plugin>
     </plugins>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>

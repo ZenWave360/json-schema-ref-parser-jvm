@@ -3,18 +3,13 @@ package io.zenwave360.jsonrefparser.parser;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.fasterxml.jackson.core.JsonTokenId.ID_START_ARRAY;
 import static com.fasterxml.jackson.core.JsonTokenId.ID_START_OBJECT;
@@ -61,7 +56,7 @@ public class JsonDeserializerWithLocations extends UntypedObjectDeserializer {
 
     String getFullPathName(JsonParser jsonParser) throws IOException {
         List<String> paths = new ArrayList<>();
-        var context = jsonParser.getParsingContext();
+        com.fasterxml.jackson.core.JsonStreamContext context = jsonParser.getParsingContext();
         if (context.inRoot()) {
             paths.add("$");
         } else {

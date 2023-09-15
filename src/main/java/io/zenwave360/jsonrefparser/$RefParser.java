@@ -2,11 +2,7 @@ package io.zenwave360.jsonrefparser;
 
 import io.zenwave360.jsonrefparser.parser.ExtendedJsonContext;
 import io.zenwave360.jsonrefparser.parser.Parser;
-import io.zenwave360.jsonrefparser.resolver.ClasspathResolver;
-import io.zenwave360.jsonrefparser.resolver.FileResolver;
-import io.zenwave360.jsonrefparser.resolver.HttpResolver;
-import io.zenwave360.jsonrefparser.resolver.RefFormat;
-import io.zenwave360.jsonrefparser.resolver.Resolver;
+import io.zenwave360.jsonrefparser.resolver.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,14 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class $RefParser {
@@ -97,7 +86,7 @@ public class $RefParser {
     public $RefParser withResourceClassLoader(ClassLoader resourceClassLoader) {
         this.resourceClassLoader = resourceClassLoader;
         Parser.withResourceClassLoader(resourceClassLoader);
-        var classpathResolver = this.resolvers.get(RefFormat.CLASSPATH);
+        Resolver classpathResolver = this.resolvers.get(RefFormat.CLASSPATH);
         if(classpathResolver instanceof ClasspathResolver) {
             ((ClasspathResolver) classpathResolver).withResourceClassLoader(resourceClassLoader);
         }
@@ -200,7 +189,7 @@ public class $RefParser {
         return StringUtils.join(indent, "");
     }
     private void dereference(ExtendedJsonContext jsonContext, Object value, String[] paths, URI currentFileURL) {
-        var visitedNodeRef = String.format("%s%s", currentFileURL, jsonPointer(paths));
+        String visitedNodeRef = String.format("%s%s", currentFileURL, jsonPointer(paths));
         log.trace("{}visiting {}", indent(), visitedNodeRef);
         if(visited.contains(visitedNodeRef)) {
             log.trace("{}skipping visited {}", indent(), visitedNodeRef);
@@ -242,9 +231,9 @@ public class $RefParser {
             }
             indent.remove(indent.size() -1);
             // dereference resolved
-            var resolvedRefURL = ObjectUtils.firstNonNull($ref.getURI(), currentFileURL);
-            var resolvedNodePaths = jsonPointerToPaths($ref.getPath());
-            var resolvedNodeRef =  String.format("%s%s", resolvedRefURL, $ref.getPath());
+            URI resolvedRefURL = ObjectUtils.firstNonNull($ref.getURI(), currentFileURL);
+            String[] resolvedNodePaths = jsonPointerToPaths($ref.getPath());
+            String resolvedNodeRef =  String.format("%s%s", resolvedRefURL, $ref.getPath());
             indent.add(" => ");
             log.trace("{}dereferencing resolved {}", indent(), resolvedNodeRef);
             dereference(jsonContext, resolved, resolvedNodePaths, resolvedRefURL);

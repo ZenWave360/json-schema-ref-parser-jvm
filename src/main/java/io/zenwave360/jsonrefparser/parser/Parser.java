@@ -1,48 +1,39 @@
 package io.zenwave360.jsonrefparser.parser;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
-import io.zenwave360.jsonrefparser.resolver.ClasspathResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Parser {
 
     private static final Logger log = LoggerFactory.getLogger(Parser.class);
 
     private static ClassLoader resourceClassLoader = Parser.class.getClassLoader();
+
     public static void withResourceClassLoader(ClassLoader resourceClassLoader) {
-        if(resourceClassLoader != null) {
+        if (resourceClassLoader != null) {
             Parser.resourceClassLoader = resourceClassLoader;
         }
     }
 
     public static ExtendedJsonContext parse(URI uri) throws IOException {
-        if("classpath".contentEquals(uri.getScheme())) {
+        if ("classpath".contentEquals(uri.getScheme())) {
             return parse(resourceClassLoader.getResourceAsStream(uri.getPath().replaceFirst("^/", "")), uri);
         }
         // TODO: it does not support yet parsing http/https files directly
@@ -95,8 +86,11 @@ public class Parser {
                 return EnumSet.noneOf(Option.class);
             }
         });
-        var content = new String(inputStream.readAllBytes());
-        var parsed = JsonPath.parse(content);
+        String content =
+                new BufferedReader((new InputStreamReader(inputStream)))
+                        .lines()
+                        .collect(Collectors.joining(System.lineSeparator()));
+        com.jayway.jsonpath.DocumentContext parsed = JsonPath.parse(content);
         ExtendedJsonContext.of(parsed, jsonDeserializerWithLocations.getLocations()).toString();
         return ExtendedJsonContext.of(parsed, jsonDeserializerWithLocations.getLocations());
     }

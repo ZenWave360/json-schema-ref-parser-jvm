@@ -104,13 +104,13 @@ public class ParserTest {
         $RefParser parser = new $RefParser(file).parse();
         $Refs refs = parser.dereference().getRefs();
         Assert.assertFalse(refs.circular);
-        var serverLocations = refs.getJsonLocationRange("$.servers");
+        org.apache.commons.lang3.tuple.Pair<com.fasterxml.jackson.core.JsonLocation, com.fasterxml.jackson.core.JsonLocation> serverLocations = refs.getJsonLocationRange("$.servers");
         Assert.assertEquals(8, serverLocations.getLeft().getLineNr());
         Assert.assertEquals(3, serverLocations.getLeft().getColumnNr());
         Assert.assertEquals(18, serverLocations.getRight().getLineNr());
         Assert.assertEquals(1, serverLocations.getRight().getColumnNr());
         File avro = new File("src/test/resources/asyncapi/shoping-cart-multiple-files/add_cart_lines.avsc");
-        var avroLocations = refs.getJsonLocationRange(avro.toURI(), "$.fields");
+        org.apache.commons.lang3.tuple.Pair<com.fasterxml.jackson.core.JsonLocation, com.fasterxml.jackson.core.JsonLocation> avroLocations = refs.getJsonLocationRange(avro.toURI(), "$.fields");
         Assert.assertEquals(6, avroLocations.getLeft().getLineNr());
         Assert.assertEquals(15, avroLocations.getLeft().getColumnNr());
         Assert.assertEquals(17, avroLocations.getRight().getLineNr());
@@ -124,7 +124,7 @@ public class ParserTest {
         File file = new File("src/test/resources/asyncapi/shoping-cart-multiple-files/add_cart_lines.avsc");
         $RefParser parser = new $RefParser(file).parse();
         $Refs refs = parser.dereference().getRefs();
-        var avroLocations = refs.getJsonLocationRange("$.fields");
+        org.apache.commons.lang3.tuple.Pair<com.fasterxml.jackson.core.JsonLocation, com.fasterxml.jackson.core.JsonLocation> avroLocations = refs.getJsonLocationRange("$.fields");
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
         Assert.assertEquals(6, avroLocations.getLeft().getLineNr());
         Assert.assertEquals(15, avroLocations.getLeft().getColumnNr());

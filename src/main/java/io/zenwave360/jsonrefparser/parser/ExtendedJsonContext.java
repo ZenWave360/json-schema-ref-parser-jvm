@@ -45,7 +45,7 @@ public interface ExtendedJsonContext extends DocumentContext {
                     }
 //                    System.out.println("ExtendedJsonContext invoking method " + method.getName());
 
-                    var m = findMethod.apply(DocumentContext.class, method);
+                    Method m = findMethod.apply(DocumentContext.class, method);
                     if (m != null) {
 //                        System.out.println("ExtendedJsonContext invoking DocumentContext class for " + method.getName());
                         return m.invoke(jsonContext, args);
