@@ -43,19 +43,27 @@ public class Parser {
 
     public static ExtendedJsonContext parse(URI uri) throws IOException {
         if("classpath".contentEquals(uri.getScheme())) {
-            return parse(resourceClassLoader.getResourceAsStream(uri.getPath().replaceFirst("^/", "")), uri);
+            try(var inputStream = resourceClassLoader.getResourceAsStream(uri.getPath().replaceFirst("^/", ""))) {
+                return parse(inputStream, uri);
+            }
         }
         // TODO: it does not support yet parsing http/https files directly
-        return parse(new FileInputStream(new File(uri)), uri);
+        try(var inputStream = new FileInputStream(new File(uri))) {
+            return parse(inputStream, uri);
+        }
     }
 
     public static ExtendedJsonContext parse(File file) throws IOException {
-        return parse(new FileInputStream(file), file);
+        try(var inputStream = new FileInputStream(file)) {
+            return parse(inputStream, file);
+        }
     }
 
     public static ExtendedJsonContext parse(String content) {
         try {
-            return parse(new ByteArrayInputStream(content.getBytes()), "string");
+            try(var inputStream = new ByteArrayInputStream(content.getBytes())) {
+                return parse(inputStream, "string");
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
