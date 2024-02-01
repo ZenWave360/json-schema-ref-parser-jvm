@@ -48,6 +48,7 @@ public class HttpResolver implements Resolver {
     @Override
     public String resolve($Ref $ref) {
         try {
+            log.trace("Resolving url: {}", $ref.getURI());
             return downloadUrlToString($ref.getURI().toString(), authenticationValues);
         } catch (FileNotFoundException e) {
             throw new MissingResourceException("File not found: " + $ref.getURI(), e);

@@ -83,28 +83,13 @@ public class Parser {
         module.addDeserializer(Object.class, jsonDeserializerWithLocations);
         mapper.registerModule(module);
 
-        Configuration.setDefaults(new Configuration.Defaults() {
-
-            private final JsonProvider jsonProvider = new CustomJacksonJsonProvider(mapper);
-            private final MappingProvider mappingProvider = new JacksonMappingProvider(mapper);
-
-            @Override
-            public JsonProvider jsonProvider() {
-                return jsonProvider;
-            }
-
-            @Override
-            public MappingProvider mappingProvider() {
-                return mappingProvider;
-            }
-
-            @Override
-            public Set<Option> options() {
-                return EnumSet.noneOf(Option.class);
-            }
-        });
+        var jsonPathConfiguration = new Configuration.ConfigurationBuilder()
+                .jsonProvider(new CustomJacksonJsonProvider(mapper))
+                .mappingProvider(new JacksonMappingProvider(mapper))
+                .options(EnumSet.noneOf(Option.class))
+                .build();
         var content = new String(inputStream.readAllBytes());
-        var parsed = JsonPath.parse(content);
+        var parsed = JsonPath.parse(content, jsonPathConfiguration);
         ExtendedJsonContext.of(parsed, jsonDeserializerWithLocations.getLocations()).toString();
         return ExtendedJsonContext.of(parsed, jsonDeserializerWithLocations.getLocations());
     }
