@@ -1,0 +1,44 @@
+asyncapi: 3.0.0
+info:
+  title: Test-API
+  version: '1.0'
+channels:
+  testTopic:
+    messages:
+      test:
+        name: Test
+        payload:
+          $ref: '#/components/schemas/Test'
+operations:
+  publishTest:
+    action: send
+    summary: publish events
+    channel:
+      $ref: '#/channels/testTopic'
+components:
+  schemas:
+    Test1:
+      allOf:
+        - type: object
+          properties:
+            test1a:
+              type: string
+        - type: object
+          properties:
+            test1b:
+              type: string
+    Test2:
+      allOf:
+        - type: object
+          properties:
+            test2a:
+              type: string
+        - type: object
+          properties:
+            test2b:
+              type: string
+    Test:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Test1'
+        - $ref: '#/components/schemas/Test2'

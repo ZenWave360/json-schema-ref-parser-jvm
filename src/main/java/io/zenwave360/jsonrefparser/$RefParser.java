@@ -154,12 +154,25 @@ public class $RefParser {
             for (int i = 0; i < allOf.size(); i++) {
                 if(allOf.get(i) instanceof Map) {
                     Map<String, Object> item = (Map<String, Object>) allOf.get(i);
-                    mergedAllOfObject.putAll(item);
-                    if(item.containsKey("properties")) {
-                        properties.putAll((Map) item.get("properties"));
-                    }
-                    if(item.containsKey("required")) {
-                        required.addAll((List) item.get("required"));
+                    if(item.keySet().size() == 1 && item.containsKey("allOf")) {
+                        List<Map<String, Object>> items = (List) item.get("allOf");
+                        for (Map<String, Object> innerItem : items) {
+                            mergedAllOfObject.putAll(innerItem);
+                            if(innerItem.containsKey("properties")) {
+                                properties.putAll((Map) innerItem.get("properties"));
+                            }
+                            if(innerItem.containsKey("required")) {
+                                required.addAll((List) innerItem.get("required"));
+                            }
+                        }
+                    } else {
+                        mergedAllOfObject.putAll(item);
+                        if(item.containsKey("properties")) {
+                            properties.putAll((Map) item.get("properties"));
+                        }
+                        if(item.containsKey("required")) {
+                            required.addAll((List) item.get("required"));
+                        }
                     }
                 } else {
                     throw new RuntimeException("Could not understand allOf: " + allOf.get(i));

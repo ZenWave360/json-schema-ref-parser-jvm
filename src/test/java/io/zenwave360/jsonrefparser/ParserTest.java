@@ -16,6 +16,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.FAIL;
 
@@ -160,6 +162,17 @@ public class ParserTest {
 //        Assert.assertFalse(refs.circular);
 //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
         assertNoRefs(refs.schema());
+    }
+
+    @Test
+    public void testDereferenceAndMerge_MultipleAllOf() throws IOException {
+        File file = new File("src/test/resources/asyncapi/multiple-allOf.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+
+        assertNoRefs(refs.schema());
+        var properties = (Map) refs.get("$.components.schemas.Test.properties");
+        Assert.assertEquals(4, properties.size());
     }
 
     @Test
