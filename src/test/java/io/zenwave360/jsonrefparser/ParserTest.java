@@ -176,6 +176,18 @@ public class ParserTest {
     }
 
     @Test
+    public void testDereferenceAndMerge_MultipleAllOf2() throws IOException {
+        File file = new File("src/test/resources/asyncapi/multiple-allOf2.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+
+        assertNoRefs(refs.schema());
+        var properties = (Map) refs.get("$.components.schemas.Test.properties");
+        Assert.assertEquals(5, properties.size());
+    }
+
+
+    @Test
     public void testDereference() throws IOException {
         File file = new File("src/test/resources/openapi/allOf.yml");
         $RefParser parser = new $RefParser(file).parse();

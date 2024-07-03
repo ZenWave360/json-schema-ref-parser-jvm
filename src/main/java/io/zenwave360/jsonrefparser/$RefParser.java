@@ -20,11 +20,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class $RefParser {
@@ -148,45 +146,28 @@ public class $RefParser {
 //        visited.add(value);
         if(paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
             List allOf = (List) value;
-            List<String> required = new ArrayList<>();
-            Map<String, Object> properties = new LinkedHashMap<>();
-            Map<String, Object> mergedAllOfObject = new LinkedHashMap<>();
+//            List<String> required = new ArrayList<>();
+//            Map<String, Object> properties = new LinkedHashMap<>();
+//            Map<String, Object> mergedAllOfObject = new LinkedHashMap<>();
+            AllOfObject allOfObject = new AllOfObject();
             for (int i = 0; i < allOf.size(); i++) {
                 if(allOf.get(i) instanceof Map) {
                     Map<String, Object> item = (Map<String, Object>) allOf.get(i);
-                    if(item.keySet().size() == 1 && item.containsKey("allOf")) {
-                        List<Map<String, Object>> items = (List) item.get("allOf");
-                        for (Map<String, Object> innerItem : items) {
-                            mergedAllOfObject.putAll(innerItem);
-                            if(innerItem.containsKey("properties")) {
-                                properties.putAll((Map) innerItem.get("properties"));
-                            }
-                            if(innerItem.containsKey("required")) {
-                                required.addAll((List) innerItem.get("required"));
-                            }
-                        }
-                    } else {
-                        mergedAllOfObject.putAll(item);
-                        if(item.containsKey("properties")) {
-                            properties.putAll((Map) item.get("properties"));
-                        }
-                        if(item.containsKey("required")) {
-                            required.addAll((List) item.get("required"));
-                        }
-                    }
+                    merge(allOfObject, item);
                 } else {
                     throw new RuntimeException("Could not understand allOf: " + allOf.get(i));
                 }
             }
-            if(!required.isEmpty()) {
-                mergedAllOfObject.put("required", required);
-            }
-            if(!properties.isEmpty()) {
-                mergedAllOfObject.put("properties", properties);
-            }
+//            if(!required.isEmpty()) {
+//                mergedAllOfObject.put("required", required);
+//            }
+//            if(!properties.isEmpty()) {
+//                mergedAllOfObject.put("properties", properties);
+//            }
             String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
             String jsonPath = jsonPath(jsonPaths);
             try {
+                var mergedAllOfObject = allOfObject.buildAllOfObject();
                 refs.jsonContext.set(jsonPath, mergedAllOfObject);
                 refs.saveOriginalAllOf(mergedAllOfObject, allOf);
             } catch (Exception e){
@@ -204,6 +185,44 @@ public class $RefParser {
             for (int i = 0; i < list.size(); i++) {
                 mergeAllOf(list.get(i), ArrayUtils.add(paths, i + ""), currentFileURL);
             }
+        }
+    }
+
+    private void merge(AllOfObject allOfObject, List<Map<String, Object>> items) {
+        for (Map<String, Object> innerItem : items) {
+            merge(allOfObject, innerItem);
+        }
+    }
+
+    private void merge(AllOfObject allOfObject, Map<String, Object> item) {
+        if(item.keySet().size() == 1 && item.containsKey("allOf")) {
+            List<Map<String, Object>> items = (List) item.get("allOf");
+            merge(allOfObject, items);
+        } else {
+            allOfObject.allOf.putAll(item);
+            if(item.containsKey("properties")) {
+                allOfObject.properties.putAll((Map) item.get("properties"));
+            }
+            if(item.containsKey("required")) {
+                allOfObject.required.addAll((List) item.get("required"));
+            }
+        }
+    }
+
+    private static class AllOfObject {
+        Map<String, Object> allOf = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
+        List<String> required = new ArrayList<>();
+
+        Map<String, Object> buildAllOfObject() {
+            Map<String, Object> allOfObject = new LinkedHashMap<>(allOf);
+            if(!required.isEmpty()) {
+                allOfObject.put("required", required);
+            }
+            if(!properties.isEmpty()) {
+                allOfObject.put("properties", properties);
+            }
+            return allOfObject;
         }
     }
 
