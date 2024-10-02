@@ -42,7 +42,7 @@ public class Parser {
     }
 
     public static ExtendedJsonContext parse(URI uri) throws IOException {
-        if("classpath".contentEquals(uri.getScheme())) {
+        if(uri.getScheme() != null && "classpath".contentEquals(uri.getScheme())) {
             try(var inputStream = resourceClassLoader.getResourceAsStream(uri.getPath().replaceFirst("^/", ""))) {
                 return parse(inputStream, uri);
             }
