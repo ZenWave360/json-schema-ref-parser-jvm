@@ -38,6 +38,8 @@ public class ParserTest {
         Assert.assertFalse(hasRefs);
     }
 
+
+
     private void assertNoAllOfs(Object object) throws JsonProcessingException {
         String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
         boolean hasRefs = json.contains("allOf");
@@ -186,6 +188,15 @@ public class ParserTest {
         Assert.assertEquals(5, properties.size());
     }
 
+    @Test
+    public void testDereferenceAndMergeChainedAllOf() throws IOException {
+        File file = new File("src/test/resources/asyncapi/car-engine_chained_allOf.yml");
+        $RefParser parser = new $RefParser(file).parse();
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        // Assert.assertFalse(refs.circular);
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoAllOfs(refs.schema());
+    }
 
     @Test
     public void testDereference() throws IOException {

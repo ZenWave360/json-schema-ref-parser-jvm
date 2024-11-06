@@ -1,0 +1,45 @@
+asyncapi: '2.6.0'
+info:
+  title: Account Service
+  version: 1.0.0
+  description: This service is in charge of processing user signups
+channels:
+  exampleOp:
+    subscribe:
+      operationId: exampleOp
+      message:
+        $ref: '#/components/messages/ExampleMessage'
+components:
+  messages:
+    ExampleMessage:
+      payload:
+        $ref: '#/components/schemas/Car'
+  schemas:
+    Base:
+      type: object
+      additionalProperties: false
+      title: Base
+      properties:
+        reference:
+          type: string
+    Engine:
+      title: Engine
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          title: Engine
+          additionalProperties: false
+          properties:
+            mileage:
+              type: string
+    Car:
+      title: Car
+      allOf:
+        - $ref: '#/components/schemas/Engine'
+        - type: object
+          title: Car
+          additionalProperties: false
+          properties:
+            make:
+              type: string
+

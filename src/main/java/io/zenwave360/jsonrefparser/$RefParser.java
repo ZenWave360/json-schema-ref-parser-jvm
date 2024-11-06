@@ -146,10 +146,12 @@ public class $RefParser {
 //        visited.add(value);
         if(paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
             List allOf = (List) value;
-//            List<String> required = new ArrayList<>();
-//            Map<String, Object> properties = new LinkedHashMap<>();
-//            Map<String, Object> mergedAllOfObject = new LinkedHashMap<>();
+            String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
+            String jsonPath = jsonPath(jsonPaths);
+            Map<String, Object> originalAllOfRoot = refs.jsonContext.read(jsonPath);
+
             AllOfObject allOfObject = new AllOfObject();
+            merge(allOfObject, originalAllOfRoot);
             for (int i = 0; i < allOf.size(); i++) {
                 if(allOf.get(i) instanceof Map) {
                     Map<String, Object> item = (Map<String, Object>) allOf.get(i);
@@ -158,14 +160,7 @@ public class $RefParser {
                     throw new RuntimeException("Could not understand allOf: " + allOf.get(i));
                 }
             }
-//            if(!required.isEmpty()) {
-//                mergedAllOfObject.put("required", required);
-//            }
-//            if(!properties.isEmpty()) {
-//                mergedAllOfObject.put("properties", properties);
-//            }
-            String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
-            String jsonPath = jsonPath(jsonPaths);
+
             try {
                 var mergedAllOfObject = allOfObject.buildAllOfObject();
                 refs.jsonContext.set(jsonPath, mergedAllOfObject);
@@ -199,7 +194,13 @@ public class $RefParser {
             List<Map<String, Object>> items = (List) item.get("allOf");
             merge(allOfObject, items);
         } else {
-            allOfObject.allOf.putAll(item);
+            for (Map.Entry<String, Object> entry : item.entrySet()) {
+                if(entry.getKey().equals("allOf")) {
+                    merge(allOfObject, (List) item.get("allOf"));
+                } else {
+                    allOfObject.allOf.put(entry.getKey(), entry.getValue());
+                }
+            }
             if(item.containsKey("properties")) {
                 allOfObject.properties.putAll((Map) item.get("properties"));
             }
@@ -213,6 +214,7 @@ public class $RefParser {
         Map<String, Object> allOf = new HashMap<>();
         Map<String, Object> properties = new HashMap<>();
         List<String> required = new ArrayList<>();
+
 
         Map<String, Object> buildAllOfObject() {
             Map<String, Object> allOfObject = new LinkedHashMap<>(allOf);
