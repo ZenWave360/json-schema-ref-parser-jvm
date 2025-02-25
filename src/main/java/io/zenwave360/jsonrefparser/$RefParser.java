@@ -293,7 +293,8 @@ public class $RefParser {
                 log.trace("{}setting resolved value at {} {}", indent(), innerJsonPath, currentFileURL);
                 resolved = dereference($ref, jsonContext, currentFileURL);
                 this.refs.saveOriginalRef($ref, resolved);
-                jsonContext.set(innerJsonPath, resolved);
+                // jsonContext.set(innerJsonPath, resolved);
+                replaceWith$Ref(jsonContext, innerJsonPath, resolved);
             }catch (Exception e){
                 log.error("Error setting jsonPath: {} in {}", innerJsonPath,  currentFileURL, e);
                 throw e;
@@ -310,6 +311,18 @@ public class $RefParser {
                  dereference(jsonContext, list.get(i), ArrayUtils.add(paths, i + ""), currentFileURL);
              }
         }
+    }
+
+    private void replaceWith$Ref(ExtendedJsonContext jsonContext, String jsonPath, Object resolved) {
+        Map<String, Object> original = jsonContext.read(jsonPath);
+        if (resolved instanceof Map) {
+            for (Map.Entry<String, Object> entry : (original).entrySet()) {
+                if(!entry.getKey().equals("$ref")) {
+                    ((Map) resolved).put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        jsonContext.set(jsonPath, resolved);
     }
 
     private Object dereference($Ref $ref, ExtendedJsonContext jsonContext, URI currentFileURL)  {
