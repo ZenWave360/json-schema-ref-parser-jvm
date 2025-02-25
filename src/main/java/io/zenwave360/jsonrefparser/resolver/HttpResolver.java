@@ -57,6 +57,7 @@ public class HttpResolver implements Resolver {
             throw new RuntimeException(e);
         }
     }
+
     protected String downloadUrlToString(String url, List<AuthenticationValue> auths) throws Exception {
         InputStream is = null;
         BufferedReader br = null;

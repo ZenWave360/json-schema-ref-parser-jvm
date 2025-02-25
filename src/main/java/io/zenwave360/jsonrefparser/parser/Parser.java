@@ -47,7 +47,7 @@ public class Parser {
                 return parse(inputStream, uri);
             }
         }
-        // TODO: it does not support yet parsing http/https files directly
+        // It does not support parsing http/https files directly: use `$RefParser(uri).parse()` instead
         try(var inputStream = new FileInputStream(new File(uri))) {
             return parse(inputStream, uri);
         }

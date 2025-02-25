@@ -85,7 +85,12 @@ public class $RefParser {
         if(file != null) {
             refs = new $Refs(Parser.parse(file), uri);
         } else if (uri != null) {
-            refs = new $Refs(Parser.parse(uri), uri);
+            if (uri.getScheme() != null && ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme()))) {
+                var text = this.resolvers.get(RefFormat.URL).resolve($Ref.of(uri.toURL().toExternalForm(), uri));
+                refs = new $Refs(Parser.parse(text), uri);
+            } else {
+                refs = new $Refs(Parser.parse(uri), uri);
+            }
         } else {
             refs = new $Refs(Parser.parse(json));
         }

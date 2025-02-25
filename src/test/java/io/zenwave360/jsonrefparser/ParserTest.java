@@ -167,6 +167,16 @@ public class ParserTest {
     }
 
     @Test
+    public void testDereferenceAndMergeAllOfHttp() throws IOException {
+        var uri = URI.create("https://raw.githubusercontent.com/ZenWave360/json-schema-ref-parser-jvm/refs/heads/main/src/test/resources/openapi/allOf.yml");
+        $RefParser parser = new $RefParser(uri).parse();
+        $Refs refs = parser.dereference().mergeAllOf().getRefs();
+        //        Assert.assertFalse(refs.circular);
+        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
+    }
+
+    @Test
     public void testDereferenceAndMerge_MultipleAllOf() throws IOException {
         File file = new File("src/test/resources/asyncapi/multiple-allOf.yml");
         $RefParser parser = new $RefParser(file).parse();
