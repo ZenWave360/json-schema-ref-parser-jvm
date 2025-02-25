@@ -256,11 +256,11 @@ public class ParserTest {
 
     @Test
     public void testDereferenceHttpRefsWithQueryAuthentication() throws IOException {
-        File file = new File("src/test/resources/openapi/http-external-refs.yml");
+        File file = new File("src/test/resources/openapi/openapi-petstore-with-external-refs.yml");
         $RefParser parser = new $RefParser(file)
                 .withAuthentication(new AuthenticationValue()
                         .withQueryParam("token", "blablabla")
-                        .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")))
+                        .withUrlMatcher(url -> url.getHost().equals("petstore3.swagger.io")))
                 .withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP))
                 .parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
