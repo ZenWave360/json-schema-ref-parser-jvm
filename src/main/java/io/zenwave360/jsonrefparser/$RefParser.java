@@ -216,8 +216,8 @@ public class $RefParser {
     }
 
     private static class AllOfObject {
-        Map<String, Object> allOf = new HashMap<>();
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> allOf = new LinkedHashMap<>();
+        Map<String, Object> properties = new LinkedHashMap<>();
         List<String> required = new ArrayList<>();
 
 
