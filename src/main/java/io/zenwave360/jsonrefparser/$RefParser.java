@@ -168,6 +168,10 @@ public class $RefParser {
 
             try {
                 var mergedAllOfObject = allOfObject.buildAllOfObject();
+                $Ref originalRef = refs.getOriginalRef(originalAllOfRoot);
+                if (originalRef != null) {
+                    refs.saveOriginalRef(originalRef, mergedAllOfObject);
+                }
                 refs.jsonContext.set(jsonPath, mergedAllOfObject);
                 refs.saveOriginalAllOf(mergedAllOfObject, allOf);
             } catch (Exception e){

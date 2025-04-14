@@ -1,0 +1,60 @@
+asyncapi: 3.0.0
+info:
+  title: my-eventing-app
+  version: 1.0.0
+  description: This service is in charge of processing user signups
+servers:
+  development:
+    host: localhost:5672
+    description: Development Kafka broker.
+    protocol: kafka
+channels:
+  user-signed-up:
+    address: example.user-signed-up
+    messages:
+      userSignedUp:
+        $ref: '#/components/messages/UserSignedUpMessage'
+operations:
+  userSignUp:
+    action: send
+    channel:
+      $ref: '#/channels/user-signed-up'
+  onUserSignedUp:
+    action: receive
+    channel:
+      $ref: '#/channels/user-signed-up'
+components:
+  messages:
+    UserSignedUpMessage:
+      name: UserSignedUpMessage
+      title: User signed up event
+      summary: Inform about a new user registration in the system
+      contentType: application/cloudevents+json
+      payload:
+        $ref: '#/components/schemas/UserSignedUpPayload'
+  schemas:
+    UserSignedUpPayload:
+      name: userSignedUpPayload
+      type: object
+      allOf:
+        - $ref: schema.yaml#/BusinessEventMetadata
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/UserSignedUp"
+          required:
+            - data
+    UserSignedUp:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of the created user
+        name:
+          type: string
+          description: The first name of the user
+        created_at:
+          type: string
+          format: date-time
+          description: The user creation time
+

@@ -1,0 +1,7 @@
+BusinessEventMetadata:
+  type: object
+  properties:
+    data:
+      type: string
+      description: Some data
+
