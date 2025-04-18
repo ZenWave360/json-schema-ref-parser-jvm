@@ -3,13 +3,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.github.zenwave360</groupId>
+  <groupId>io.zenwave360</groupId>
   <artifactId>json-schema-ref-parser-jvm</artifactId>
   <version>0.8.11-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>JSON Schema Ref Parser for Java</description>
-  <url>https://zenwave360.github.io/json-schema-ref-parser-jvm/</url>
+  <url>https://www.zenwave360.io/json-schema-ref-parser-jvm/</url>
 
   <licenses>
     <license>
@@ -26,19 +26,6 @@
       <organizationUrl>https://github.com/ZenWave360</organizationUrl>
     </developer>
   </developers>
-
-  <distributionManagement>
-    <repository>
-      <id>ossrh</id>
-      <name>Central Repository OSSRH</name>
-      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <name>Central Repository OSSRH</name>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
 
   <scm>
     <connection>scm:git:git://github.com/ZenWave360/json-schema-ref-parser-jvm.git</connection>
@@ -61,6 +48,7 @@
     <avro.version>1.8.2</avro.version>
     <commons-lang3.version>3.14.0</commons-lang3.version>
     <commons-io.version>2.15.1</commons-io.version>
+    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -143,6 +131,17 @@
         </dependencies>
       </plugin>
       <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>${central-publishing-maven-plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <autoPublish>false</autoPublish>
+          <!--                    <tokenAuth>true</tokenAuth>-->
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>3.2.0</version>
@@ -197,6 +196,31 @@
             <goals>
               <goal>sign</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>enforce-release-version</id>
+            <configuration>
+              <rules>
+                <requireReleaseVersion />
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>enforce-snapshot-version</id>
+            <configuration>
+              <rules>
+                <requireSnapshotVersion>
+                  <failWhenParentIsRelease>false</failWhenParentIsRelease>
+                </requireSnapshotVersion>
+              </rules>
+            </configuration>
           </execution>
         </executions>
       </plugin>
