@@ -7,6 +7,7 @@ JSON Schema $Ref Parser for the JVM
 [![branches coverage](https://raw.githubusercontent.com/ZenWave360/json-schema-ref-parser-jvm/badges/branches.svg)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/actions/workflows/build.yml)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/json-schema-ref-parser-jvm)](https://github.com/ZenWave360/json-schema-ref-parser-jvm/blob/main/LICENSE)
 
+> **Note**: Starting with version 0.9.0, the Maven `groupId` has changed to `io.zenwave360`. The code remains fully compatible.
 
 Parse, Resolve, and Dereference JSON Schema $ref pointers
 
@@ -120,7 +121,7 @@ Installation:
 --------------------------
 ```xml
 <dependency>
-  <groupId>io.github.zenwave360</groupId>
+  <groupId>io.zenwave360</groupId>
   <artifactId>json-schema-ref-parser-jvm</artifactId>
   <version>${json-schema-ref-parser-jvm.version}</version>
 </dependency>
