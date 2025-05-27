@@ -1,8 +1,8 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,CustomYAMLParser,5,18,1,1,2,4,2,2,1,2
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,ExtendedJsonContext,5,69,1,5,1,16,1,6,0,4
-io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,CustomYAMLFactory,57,17,0,0,5,2,3,2,3,2
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,JsonDeserializerWithLocations,5,136,3,21,1,30,3,15,0,6
+io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,CustomYAMLFactory,57,17,0,0,5,2,3,2,3,2
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,CustomJacksonJsonProvider,54,150,14,14,4,24,14,11,3,8
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,Parser,16,150,3,5,4,32,4,7,1,6
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,AuthenticationValue.AuthenticationType,0,15,0,0,0,3,0,1,0,1
