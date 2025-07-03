@@ -319,14 +319,11 @@ public class $RefParser {
 
     private void replaceWith$Ref(ExtendedJsonContext jsonContext, String jsonPath, Object resolved) {
         Map<String, Object> original = jsonContext.read(jsonPath);
-        if (resolved instanceof Map) {
-            for (Map.Entry<String, Object> entry : (original).entrySet()) {
-                if(!entry.getKey().equals("$ref")) {
-                    ((Map) resolved).put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        jsonContext.set(jsonPath, resolved);
+        Map<String, Object> replacement = new LinkedHashMap<>();
+        replacement.putAll(original);
+        replacement.remove("$ref");
+        replacement.putAll((Map) resolved);
+        jsonContext.set(jsonPath, replacement);
     }
 
     private Object dereference($Ref $ref, ExtendedJsonContext jsonContext, URI currentFileURL)  {

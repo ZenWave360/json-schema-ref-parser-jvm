@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "myDummySchema",
+  "properties": {
+    "lorem": {
+      "title": "lorem",
+      "$ref": "https://json.schemastore.org/base.json#/definitions/nullable-boolean"
+    },
+    "ipsum": {
+      "title": "ipsum",
+      "$ref": "https://json.schemastore.org/base.json#/definitions/nullable-boolean"
+    }
+  }
+}
