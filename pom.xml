@@ -45,7 +45,7 @@
     <snakeyaml.version>2.4</snakeyaml.version>
     <json-path.version>2.9.0</json-path.version>
     <avro.version>1.8.2</avro.version>
-    <commons-lang3.version>3.17.0</commons-lang3.version>
+    <commons-lang3.version>3.19.0</commons-lang3.version>
     <commons-io.version>2.19.0</commons-io.version>
     <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
   </properties>
