@@ -7,15 +7,15 @@ io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,Cust
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,Parser,16,150,3,5,4,32,4,7,1,6
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,AuthenticationValue.AuthenticationType,0,15,0,0,0,3,0,1,0,1
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.Refs,107,284,25,19,24,47,24,26,7,21
-io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParser,145,1177,11,87,20,200,13,66,2,28
+io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParser,170,1243,18,94,27,212,20,70,4,30
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParser.AllOfObject,0,46,1,3,0,10,1,3,0,2
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParserOptions,12,19,0,0,3,8,1,3,1,3
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParserOptions.OnCircular,0,21,0,0,0,4,0,1,0,1
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.Ref,43,266,23,37,8,61,20,21,1,10
-io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,AuthenticationValue,50,61,0,0,18,20,7,9,7,9
+io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,AuthenticationValue,88,94,3,1,22,28,10,12,8,12
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParserOptions.OnMissing,0,15,0,0,0,3,0,1,0,1
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.resolver,Resolver,14,2,2,0,4,1,2,1,1,1
-io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.resolver,HttpResolver,50,346,8,30,18,73,8,18,0,7
+io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.resolver,HttpResolver,50,342,7,29,18,73,7,18,0,7
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.resolver,HttpResolver.new X509TrustManager() {...},1,9,0,0,1,3,1,3,1,3
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.resolver,HttpResolver.new HostnameVerifier() {...},2,6,0,0,1,1,1,1,1,1
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.resolver,HttpResolver.new HttpResolver.ConnectionConfigurator() {...},0,27,1,1,0,6,1,2,0,2
