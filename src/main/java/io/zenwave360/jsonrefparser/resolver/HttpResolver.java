@@ -2,6 +2,7 @@ package io.zenwave360.jsonrefparser.resolver;
 
 import io.zenwave360.jsonrefparser.$Ref;
 import io.zenwave360.jsonrefparser.AuthenticationValue;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,7 @@ public class HttpResolver implements Resolver {
                 final List<AuthenticationValue> header = new ArrayList<>();
                 if (auths != null && auths.size() > 0) {
                     for (AuthenticationValue auth : auths) {
-                        if (auth.getUrlMatcher() == null || auth.getUrlMatcher().test(inUrl)) {
+                        if (auth.matches(inUrl)) {
                             if (AuthenticationValue.AuthenticationType.HEADER == auth.getType()) {
                                 header.add(auth);
                             }

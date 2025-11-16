@@ -113,6 +113,20 @@ public class $RefParser {
         return this;
     }
 
+    public $RefParser withAuthenticationValues(AuthenticationValue... authenticationValue) {
+        if(authenticationValue != null) {
+            Arrays.stream(authenticationValue).forEach(this::withAuthentication);
+        }
+        return this;
+    }
+
+    public $RefParser withAuthenticationValues(List<AuthenticationValue> authenticationValue) {
+        if(authenticationValue != null) {
+            authenticationValue.forEach(this::withAuthentication);
+        }
+        return this;
+    }
+
     public $RefParser withResolver(RefFormat refFormat, Resolver resolver) {
         this.resolvers.put(refFormat, resolver);
         return this;
@@ -304,8 +318,8 @@ public class $RefParser {
                 throw e;
             }
         } else if(value instanceof Map) {
-             // visit
-             ((Map<String, Object>) value).entrySet().forEach(e -> {
+             // visit - use ArrayList to avoid ConcurrentModificationException
+             new ArrayList<>(((Map<String, Object>) value).entrySet()).forEach(e -> {
                 dereference(jsonContext, e.getValue(), ArrayUtils.add(paths, e.getKey()), currentFileURL);
             });
         } else if(value instanceof List) {
@@ -318,6 +332,28 @@ public class $RefParser {
     }
 
     private void replaceWith$Ref(ExtendedJsonContext jsonContext, String jsonPath, Object resolved) {
+        Map<String, Object> original = jsonContext.read(jsonPath);
+        if(original.containsKey("$ref") && original.size() == 1) {
+            mergeResolvedIntoOriginal(jsonContext, jsonPath, resolved);
+        } else {
+            mergeResolvedAndReplaceOriginal(jsonContext, jsonPath, resolved);
+        }
+    }
+
+    private void mergeResolvedIntoOriginal(ExtendedJsonContext jsonContext, String jsonPath, Object resolved) {
+        Map<String, Object> original = jsonContext.read(jsonPath);
+        if (resolved instanceof Map) {
+            for (Map.Entry<String, Object> entry : (original).entrySet()) {
+                if(!entry.getKey().equals("$ref")) {
+                    ((Map) resolved).put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        jsonContext.set(jsonPath, resolved);
+    }
+
+    private void mergeResolvedAndReplaceOriginal(ExtendedJsonContext jsonContext, String jsonPath, Object resolved) {
+        // losing original reference, they will become different objects
         Map<String, Object> original = jsonContext.read(jsonPath);
         Map<String, Object> replacement = new LinkedHashMap<>();
         replacement.putAll(original);
