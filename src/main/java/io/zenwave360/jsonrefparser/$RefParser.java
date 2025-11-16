@@ -359,6 +359,8 @@ public class $RefParser {
         replacement.putAll(original);
         replacement.remove("$ref");
         replacement.putAll((Map) resolved);
+        $Ref originalRef = $Ref.of((String) original.get("$ref"), uri);
+        this.refs.saveReplacedRef(originalRef, replacement);
         jsonContext.set(jsonPath, replacement);
     }
 

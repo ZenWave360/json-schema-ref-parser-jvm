@@ -32,6 +32,7 @@ public class $Refs {
 
     // References are kept on a list (instead of a Map) because Map.hashCode() is calculated recursively and may be circular references.
     private List<Pair<$Ref, Object>> originalRefsList = new ArrayList<>();
+    private List<Pair<$Ref, Object>> replacedRefsList = new ArrayList<>();
     private List<Pair<Map, List>> originalAllOfList = new ArrayList<>();
 
     public $Refs(ExtendedJsonContext jsonContext) {
@@ -50,6 +51,10 @@ public class $Refs {
 
     public List<Pair<$Ref, Object>> getOriginalRefsList() {
         return originalRefsList;
+    }
+
+    public List<Pair<$Ref, Object>> getReplacedRefsList() {
+        return replacedRefsList;
     }
 
     public $Ref getOriginalRef(Object obj) {
@@ -110,6 +115,10 @@ public class $Refs {
         if(!originalRef.equals(resolved)) {
             this.originalRefsList.add(Pair.of(originalRef, resolved));
         }
+    }
+
+    public void saveReplacedRef($Ref originalRef, Object resolved) {
+        this.replacedRefsList.add(Pair.of(originalRef, resolved));
     }
 
     public void saveOriginalAllOf(Map<String, Object> resolvedAllOf, List originalAllOf) {
