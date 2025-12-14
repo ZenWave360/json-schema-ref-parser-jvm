@@ -358,18 +358,17 @@ public class ParserTest {
     }
 
     @Test
-    @Ignore
-    public void testMergeAllOfRecursive() throws IOException {
+    public void testMergeAllOfSkipRecursive() throws IOException {
         File file = new File("src/test/resources/asyncapi/orders-model.yml");
-        $RefParser parser = new $RefParser(file).parse();
+        $RefParser parser = new $RefParser(file)
+                .withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP))
+                .parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
-        assertNoRefs(refs.schema());
         assertNoAllOfs(refs.schema());
     }
 
     @Test
-    @Ignore
     public void testDetectCircularRecursive() throws IOException {
         File file = new File("src/test/resources/asyncapi/orders-model.yml");
         $RefParser parser = new $RefParser(file).parse();

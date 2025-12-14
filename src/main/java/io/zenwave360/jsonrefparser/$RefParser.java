@@ -266,7 +266,12 @@ public class $RefParser {
         visited.add(visitedNodeRef);
         if(paths.length > 0 && "$ref".equals(paths[paths.length -1])) {
             $Ref $ref = $Ref.of((String) value, currentFileURL);
-            boolean isCircular = (jsonPointer(paths) + "/").startsWith($ref.getPath() + "/") && ($ref.getURI() == null || $ref.getURI().equals(currentFileURL));
+            // Check for circular references using visited nodes
+            var targetNodeRef = String.format("%s%s", 
+                ObjectUtils.firstNonNull($ref.getURI(), currentFileURL), 
+                ObjectUtils.firstNonNull($ref.getPath(), ""));
+            
+            boolean isCircular = visited.contains(targetNodeRef);
             if(isCircular) {
                 if(options != null && $RefParserOptions.OnCircular.FAIL == options.onCircular) {
                     throw new RuntimeException("Failing: Circular references not allowed " + $ref);
@@ -275,10 +280,8 @@ public class $RefParser {
                     return;
                 }
                 this.refs.circular = true;
-                boolean isSelfReferencing = (jsonPointer(paths)).equals($ref.getPath() + "/$ref");
-                if(isSelfReferencing) {
-                    log.debug("{}Skipping self referencing reference [TODO: implement this] {}", indent(), $ref);
-                }
+                log.debug("{}Detected circular reference to already visited node: {}", indent(), targetNodeRef);
+                return; // Skip processing this circular reference
             }
 
 
