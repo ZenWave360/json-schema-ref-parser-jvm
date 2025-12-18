@@ -291,7 +291,7 @@ public class ParserTest {
         {
             $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP)).parse();
             $Refs refs = parser.dereference().getRefs();
-            Assert.assertFalse(refs.circular);
+            Assert.assertTrue(refs.circular);
 //            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
         }
 
@@ -369,7 +369,7 @@ public class ParserTest {
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testDetectCircularRecursive() throws IOException {
         File file = new File("src/test/resources/asyncapi/orders-model.yml");
         $RefParser parser = new $RefParser(file).parse();

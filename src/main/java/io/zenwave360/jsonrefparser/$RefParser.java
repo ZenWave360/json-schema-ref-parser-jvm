@@ -17,12 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class $RefParser {
@@ -253,81 +248,93 @@ public class $RefParser {
 
     private List<Object> visited = new ArrayList<>();
     private List<String> indent = new ArrayList<>();
+    private Set<String> currentPath = new HashSet<>();
     private String indent() {
         return StringUtils.join(indent, "");
     }
     private void dereference(ExtendedJsonContext jsonContext, Object value, String[] paths, URI currentFileURL) {
         var visitedNodeRef = String.format("%s%s", currentFileURL, jsonPointer(paths));
         log.trace("{}visiting {}", indent(), visitedNodeRef);
+        
+        // Check for circular reference in current traversal path
+        if(currentPath.contains(visitedNodeRef)) {
+            this.refs.circular = true;
+            log.debug("{}Detected circular reference: {}", indent(), visitedNodeRef);
+            if(options != null && $RefParserOptions.OnCircular.FAIL == options.onCircular) {
+                throw new RuntimeException("Failing: Circular references not allowed at " + visitedNodeRef);
+            }
+            if(options != null && $RefParserOptions.OnCircular.SKIP == options.onCircular) {
+                return;
+            }
+            return;
+        }
+        
         if(visited.contains(visitedNodeRef)) {
             log.trace("{}skipping visited {}", indent(), visitedNodeRef);
             return;
         }
+        
         visited.add(visitedNodeRef);
-        if(paths.length > 0 && "$ref".equals(paths[paths.length -1])) {
-            $Ref $ref = $Ref.of((String) value, currentFileURL);
-            boolean isCircular = (jsonPointer(paths) + "/").startsWith($ref.getPath() + "/") && ($ref.getURI() == null || $ref.getURI().equals(currentFileURL));
-            if(isCircular) {
-                if(options != null && $RefParserOptions.OnCircular.FAIL == options.onCircular) {
-                    throw new RuntimeException("Failing: Circular references not allowed " + $ref);
+        currentPath.add(visitedNodeRef);
+        
+        try {
+            if(paths.length > 0 && "$ref".equals(paths[paths.length -1])) {
+                $Ref $ref = $Ref.of((String) value, currentFileURL);
+                // Check for circular references using reference stack
+                var targetNodeRef = String.format("%s%s", 
+                    ObjectUtils.firstNonNull($ref.getURI(), currentFileURL), 
+                    ObjectUtils.firstNonNull($ref.getPath(), ""));
+                
+                // do dereference
+                String[] innerJsonPaths = Arrays.copyOf(paths, paths.length -1);
+                String innerJsonPath = jsonPath(innerJsonPaths);
+                indent.add("->  ");
+                log.trace("{}resolving {} for {}", indent(), $ref, visitedNodeRef);
+                Object resolved = null;
+                try {
+                    resolved = dereference($ref, jsonContext, currentFileURL);
+                } catch (Resolver.MissingResourceException e) {
+                    if(options != null && $RefParserOptions.OnMissing.SKIP == options.onMissing) {
+                        log.warn("Skipping missing reference {}", $ref);
+                        return;
+                    }
+                    throw e;
                 }
-                if(options != null && $RefParserOptions.OnCircular.SKIP == options.onCircular) {
-                    return;
-                }
-                this.refs.circular = true;
-                boolean isSelfReferencing = (jsonPointer(paths)).equals($ref.getPath() + "/$ref");
-                if(isSelfReferencing) {
-                    log.debug("{}Skipping self referencing reference [TODO: implement this] {}", indent(), $ref);
-                }
-            }
+                indent.remove(indent.size() -1);
+                // dereference resolved
+                var resolvedRefURL = ObjectUtils.firstNonNull($ref.getURI(), currentFileURL);
+                var resolvedNodePaths = jsonPointerToPaths($ref.getPath());
+                var resolvedNodeRef =  String.format("%s%s", resolvedRefURL, $ref.getPath());
+                indent.add(" => ");
+                log.trace("{}dereferencing resolved {}", indent(), resolvedNodeRef);
+                dereference(jsonContext, resolved, resolvedNodePaths, resolvedRefURL);
+                indent.remove(indent.size() -1);
 
-
-            // do dereference
-            String[] innerJsonPaths = Arrays.copyOf(paths, paths.length -1);
-            String innerJsonPath = jsonPath(innerJsonPaths);
-            indent.add("->  ");
-            log.trace("{}resolving {} for {}", indent(), $ref, visitedNodeRef);
-            Object resolved = null;
-            try {
-                resolved = dereference($ref, jsonContext, currentFileURL);
-            } catch (Resolver.MissingResourceException e) {
-                if(options != null && $RefParserOptions.OnMissing.SKIP == options.onMissing) {
-                    log.warn("Skipping missing reference {}", $ref);
-                    return;
+                try {
+                    log.trace("{}setting resolved value at {} {}", indent(), innerJsonPath, currentFileURL);
+                    resolved = dereference($ref, jsonContext, currentFileURL);
+                    this.refs.saveOriginalRef($ref, resolved);
+                    // jsonContext.set(innerJsonPath, resolved);
+                    replaceWith$Ref(jsonContext, innerJsonPath, resolved);
+                }catch (Exception e){
+                    log.error("Error setting jsonPath: {} in {}", innerJsonPath,  currentFileURL, e);
+                    throw e;
                 }
-                throw e;
-            }
-            indent.remove(indent.size() -1);
-            // dereference resolved
-            var resolvedRefURL = ObjectUtils.firstNonNull($ref.getURI(), currentFileURL);
-            var resolvedNodePaths = jsonPointerToPaths($ref.getPath());
-            var resolvedNodeRef =  String.format("%s%s", resolvedRefURL, $ref.getPath());
-            indent.add(" => ");
-            log.trace("{}dereferencing resolved {}", indent(), resolvedNodeRef);
-            dereference(jsonContext, resolved, resolvedNodePaths, resolvedRefURL);
-            indent.remove(indent.size() -1);
 
-            try {
-                log.trace("{}setting resolved value at {} {}", indent(), innerJsonPath, currentFileURL);
-                resolved = dereference($ref, jsonContext, currentFileURL);
-                this.refs.saveOriginalRef($ref, resolved);
-                // jsonContext.set(innerJsonPath, resolved);
-                replaceWith$Ref(jsonContext, innerJsonPath, resolved);
-            }catch (Exception e){
-                log.error("Error setting jsonPath: {} in {}", innerJsonPath,  currentFileURL, e);
-                throw e;
+            } else if(value instanceof Map) {
+                 // visit - use ArrayList to avoid ConcurrentModificationException
+                 new ArrayList<>(((Map<String, Object>) value).entrySet()).forEach(e -> {
+                    dereference(jsonContext, e.getValue(), ArrayUtils.add(paths, e.getKey()), currentFileURL);
+                });
+            } else if(value instanceof List) {
+                 // visit
+                 List list = (List) value;
+                 for (int i = 0; i < list.size(); i++) {
+                     dereference(jsonContext, list.get(i), ArrayUtils.add(paths, i + ""), currentFileURL);
+                 }
             }
-        } else if(value instanceof Map) {
-             // visit - use ArrayList to avoid ConcurrentModificationException
-             new ArrayList<>(((Map<String, Object>) value).entrySet()).forEach(e -> {
-                dereference(jsonContext, e.getValue(), ArrayUtils.add(paths, e.getKey()), currentFileURL);
-            });
-        } else if(value instanceof List) {
-             // visit
-             List list = (List) value;
-             for (int i = 0; i < list.size(); i++) {
-                 dereference(jsonContext, list.get(i), ArrayUtils.add(paths, i + ""), currentFileURL);
-             }
+        } finally {
+            currentPath.remove(visitedNodeRef);
         }
     }
 
