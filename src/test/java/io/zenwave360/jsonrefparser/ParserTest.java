@@ -1,11 +1,11 @@
 package io.zenwave360.jsonrefparser;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
 import io.zenwave360.jsonrefparser.resolver.HttpResolver;
 import io.zenwave360.jsonrefparser.resolver.Resolver;
@@ -16,8 +16,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.FAIL;
 
@@ -27,6 +26,10 @@ public class ParserTest {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        
+        SimpleModule module = new SimpleModule();
+        module.addSerializer((Class<Map<?, ?>>) (Class<?>) Map.class, new CycleBreakingMapSerializer());
+        mapper.registerModule(module);
     }
 
     private void assertNoRefs(Object object) throws JsonProcessingException {
@@ -193,8 +196,34 @@ public class ParserTest {
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
 
         assertNoRefs(refs.schema());
+        assertNoAllOfs(refs.schema());
+        
+        // Test merged properties from Test1 (test1a, test1b)
+        var test1Properties = (Map) refs.get("$.components.schemas.Test1.properties");
+        Assert.assertEquals(2, test1Properties.size());
+        Assert.assertTrue(test1Properties.containsKey("test1a"));
+        Assert.assertTrue(test1Properties.containsKey("test1b"));
+        Assert.assertEquals("string", ((Map) test1Properties.get("test1a")).get("type"));
+        Assert.assertEquals("string", ((Map) test1Properties.get("test1b")).get("type"));
+        
+        // Test merged properties from Test2 (test2a, test2b)
+        var test2Properties = (Map) refs.get("$.components.schemas.Test2.properties");
+        Assert.assertEquals(2, test2Properties.size());
+        Assert.assertTrue(test2Properties.containsKey("test2a"));
+        Assert.assertTrue(test2Properties.containsKey("test2b"));
+        
+        // Test final merged Test schema contains all 4 properties
         var properties = (Map) refs.get("$.components.schemas.Test.properties");
         Assert.assertEquals(4, properties.size());
+        Assert.assertTrue(properties.containsKey("test1a"));
+        Assert.assertTrue(properties.containsKey("test1b"));
+        Assert.assertTrue(properties.containsKey("test2a"));
+        Assert.assertTrue(properties.containsKey("test2b"));
+        
+        // Verify Test schema maintains its object type
+        var testSchema = (Map) refs.get("$.components.schemas.Test");
+        Assert.assertEquals("object", testSchema.get("type"));
+        Assert.assertFalse(testSchema.containsKey("allOf"));
     }
 
     @Test
@@ -204,8 +233,32 @@ public class ParserTest {
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
 
         assertNoRefs(refs.schema());
+        assertNoAllOfs(refs.schema());
+        
+        // Test Test1b has merged properties (test1b, test1c)
+        var test1bProperties = (Map) refs.get("$.components.schemas.Test1b.properties");
+        Assert.assertEquals(2, test1bProperties.size());
+        Assert.assertTrue(test1bProperties.containsKey("test1b"));
+        Assert.assertTrue(test1bProperties.containsKey("test1c"));
+        
+        // Test Test1 has all 3 properties (test1a from itself + test1b, test1c from Test1b)
+        var test1Properties = (Map) refs.get("$.components.schemas.Test1.properties");
+        Assert.assertEquals(3, test1Properties.size());
+        Assert.assertTrue(test1Properties.containsKey("test1a"));
+        Assert.assertTrue(test1Properties.containsKey("test1b"));
+        Assert.assertTrue(test1Properties.containsKey("test1c"));
+        
+        // Test final Test schema has all 5 properties
         var properties = (Map) refs.get("$.components.schemas.Test.properties");
         Assert.assertEquals(5, properties.size());
+        Assert.assertTrue(properties.containsKey("test1a"));
+        Assert.assertTrue(properties.containsKey("test1b"));
+        Assert.assertTrue(properties.containsKey("test1c"));
+        Assert.assertTrue(properties.containsKey("test2a"));
+        Assert.assertTrue(properties.containsKey("test2b"));
+        
+        // Verify no circular references detected
+        Assert.assertFalse(refs.circular);
     }
 
     @Test
@@ -358,25 +411,51 @@ public class ParserTest {
     }
 
     @Test
-    @Ignore
     public void testMergeAllOfRecursive() throws IOException {
         File file = new File("src/test/resources/asyncapi/orders-model.yml");
         $RefParser parser = new $RefParser(file).parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+//        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        Assert.assertTrue(refs.circular);
         assertNoRefs(refs.schema());
         assertNoAllOfs(refs.schema());
     }
 
     @Test
-//    @Ignore
     public void testDetectCircularRecursive() throws IOException {
         File file = new File("src/test/resources/asyncapi/orders-model.yml");
         $RefParser parser = new $RefParser(file).parse();
         $Refs refs = parser.dereference().getRefs();
         Assert.assertTrue(refs.circular);
-        //        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
-        //        assertNoRefs(refs.schema());
+//        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        assertNoRefs(refs.schema());
     }
 
+
+    class CycleBreakingMapSerializer extends JsonSerializer<Map<?, ?>> {
+        private final ThreadLocal<Set<Object>> SEEN =
+                ThreadLocal.withInitial(() -> Collections.newSetFromMap(new IdentityHashMap<>()));
+
+        @Override
+        public void serialize(Map<?, ?> map, JsonGenerator gen, SerializerProvider provider)
+                throws IOException {
+            Set<Object> seen = SEEN.get();
+            if (seen.contains(map)) {
+                gen.writeString("CYCLE");  // O gen.writeNull() para omitir
+                return;
+            }
+            seen.add(map);
+            try {
+                gen.writeStartObject();
+                for (Map.Entry<?, ?> entry : map.entrySet()) {
+                    gen.writeFieldName(entry.getKey().toString());
+                    Object value = entry.getValue();
+                    provider.defaultSerializeValue(value, gen);  // Usa serializador recursivo para valores Map
+                }
+                gen.writeEndObject();
+            } finally {
+                seen.remove(map);
+            }
+        }
+    }
 }

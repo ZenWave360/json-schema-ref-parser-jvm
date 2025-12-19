@@ -2,11 +2,7 @@ package io.zenwave360.jsonrefparser;
 
 import io.zenwave360.jsonrefparser.parser.ExtendedJsonContext;
 import io.zenwave360.jsonrefparser.parser.Parser;
-import io.zenwave360.jsonrefparser.resolver.ClasspathResolver;
-import io.zenwave360.jsonrefparser.resolver.FileResolver;
-import io.zenwave360.jsonrefparser.resolver.HttpResolver;
-import io.zenwave360.jsonrefparser.resolver.RefFormat;
-import io.zenwave360.jsonrefparser.resolver.Resolver;
+import io.zenwave360.jsonrefparser.resolver.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -143,61 +139,69 @@ public class $RefParser {
         return this;
     }
 
+    private Set<Object> mergeAllOfObjectStack = Collections.newSetFromMap(new IdentityHashMap<>());
+
     public $RefParser mergeAllOf() {
         this.refs.addPath(uri);
         this.visited.clear();
+        this.mergeAllOfObjectStack.clear();
         mergeAllOf(refs.schema(), new String[0], uri);
         return this;
     }
 
     private void mergeAllOf(Object value, String[] paths, URI currentFileURL) {
-//        var visitedNodeRef = String.format("%s%s", currentFileURL, jsonPointer(paths));
-//        log.trace("{}visiting {}", indent(), visitedNodeRef);
-//        if(visited.contains(value)) {
-//            log.trace("{}skipping visited {}", indent(), visitedNodeRef);
-//            return;
-//        }
-//        visited.add(value);
-        if(paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
-            List allOf = (List) value;
-            String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
-            String jsonPath = jsonPath(jsonPaths);
-            Map<String, Object> originalAllOfRoot = refs.jsonContext.read(jsonPath);
+        // Use object identity to detect actual circular object references
+        if (mergeAllOfObjectStack.contains(value)) {
+            log.debug("Detected circular object reference during mergeAllOf at path: {}", Arrays.toString(paths));
+            return; // Skip to prevent infinite recursion
+        }
+        
+        mergeAllOfObjectStack.add(value);
+        
+        try {
+            if (paths.length > 0 && "allOf".equals(paths[paths.length -1])) {
+                List allOf = (List) value;
+                String[] jsonPaths = Arrays.copyOf(paths, paths.length -1);
+                String jsonPath = jsonPath(jsonPaths);
+                Map<String, Object> originalAllOfRoot = refs.jsonContext.read(jsonPath);
 
-            AllOfObject allOfObject = new AllOfObject();
-            merge(allOfObject, originalAllOfRoot);
-            for (int i = 0; i < allOf.size(); i++) {
-                if(allOf.get(i) instanceof Map) {
-                    Map<String, Object> item = (Map<String, Object>) allOf.get(i);
-                    merge(allOfObject, item);
-                } else {
-                    throw new RuntimeException("Could not understand allOf: " + allOf.get(i));
+                AllOfObject allOfObject = new AllOfObject();
+                merge(allOfObject, originalAllOfRoot);
+                for (int i = 0; i < allOf.size(); i++) {
+                    if(allOf.get(i) instanceof Map) {
+                        Map<String, Object> item = (Map<String, Object>) allOf.get(i);
+                        merge(allOfObject, item);
+                    } else {
+                        throw new RuntimeException("Could not understand allOf: " + allOf.get(i));
+                    }
+                }
+
+                try {
+                    var mergedAllOfObject = allOfObject.buildAllOfObject();
+                    $Ref originalRef = refs.getOriginalRef(originalAllOfRoot);
+                    if (originalRef != null) {
+                        refs.saveOriginalRef(originalRef, mergedAllOfObject);
+                    }
+                    refs.jsonContext.set(jsonPath, mergedAllOfObject);
+                    refs.saveOriginalAllOf(mergedAllOfObject, allOf);
+                } catch (Exception e){
+                    log.error("Error setting jsonPath:{} in file:{}", jsonPath, currentFileURL, e);
+                    throw e;
+                }
+            } else if(value instanceof Map) {
+                // visit
+                ((Map<String, Object>) value).entrySet().forEach(e -> {
+                    mergeAllOf(e.getValue(), ArrayUtils.add(paths, e.getKey()), currentFileURL);
+                });
+            } else if(value instanceof List) {
+                // visit
+                List list = (List) value;
+                for (int i = 0; i < list.size(); i++) {
+                    mergeAllOf(list.get(i), ArrayUtils.add(paths, i + ""), currentFileURL);
                 }
             }
-
-            try {
-                var mergedAllOfObject = allOfObject.buildAllOfObject();
-                $Ref originalRef = refs.getOriginalRef(originalAllOfRoot);
-                if (originalRef != null) {
-                    refs.saveOriginalRef(originalRef, mergedAllOfObject);
-                }
-                refs.jsonContext.set(jsonPath, mergedAllOfObject);
-                refs.saveOriginalAllOf(mergedAllOfObject, allOf);
-            } catch (Exception e){
-                log.error("Error setting jsonPath:{} in file:{}", jsonPath, currentFileURL, e);
-                throw e;
-            }
-        } else if(value instanceof Map) {
-            // visit
-            ((Map<String, Object>) value).entrySet().forEach(e -> {
-                mergeAllOf(e.getValue(), ArrayUtils.add(paths, e.getKey()), currentFileURL);
-            });
-        } else if(value instanceof List) {
-            // visit
-            List list = (List) value;
-            for (int i = 0; i < list.size(); i++) {
-                mergeAllOf(list.get(i), ArrayUtils.add(paths, i + ""), currentFileURL);
-            }
+        } finally {
+            mergeAllOfObjectStack.remove(value);
         }
     }
 
