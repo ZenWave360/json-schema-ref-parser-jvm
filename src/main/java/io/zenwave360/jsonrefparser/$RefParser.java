@@ -418,7 +418,11 @@ public class $RefParser {
     }
 
     private String jsonPath(String[] paths) {
-        return "$" + Arrays.stream(paths).map(path -> "['" + path + "']").collect(Collectors.joining());
+        return "$" + Arrays.stream(paths).map(path -> "['" + escapeKey(path) + "']").collect(Collectors.joining());
+    }
+
+    private String escapeKey(String key) {
+        return key.replace("\\", "\\\\").replace("'", "\\'");
     }
 
     private String jsonPointer(String[] paths) {
