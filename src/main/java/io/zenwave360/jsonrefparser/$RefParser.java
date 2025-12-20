@@ -152,7 +152,7 @@ public class $RefParser {
     private void mergeAllOf(Object value, String[] paths, URI currentFileURL) {
         // Use object identity to detect actual circular object references
         if (mergeAllOfObjectStack.contains(value)) {
-            log.debug("Detected circular object reference during mergeAllOf at path: {}", Arrays.toString(paths));
+            log.trace("Detected circular object reference during mergeAllOf at path: {}", Arrays.toString(paths));
             return; // Skip to prevent infinite recursion
         }
         
@@ -283,7 +283,11 @@ public class $RefParser {
         
         try {
             if(paths.length > 0 && "$ref".equals(paths[paths.length -1])) {
-                $Ref $ref = $Ref.of((String) value, currentFileURL);
+                $Ref $ref = extractRef(value, currentFileURL);
+                if($ref == null) {
+                    log.trace("{}Not a $ref '{}': {}", indent(), visitedNodeRef, value);
+                    return;
+                }
                 // Check for circular references using reference stack
                 var targetNodeRef = String.format("%s%s", 
                     ObjectUtils.firstNonNull($ref.getURI(), currentFileURL), 
@@ -342,6 +346,23 @@ public class $RefParser {
         }
     }
 
+    private $Ref extractRef(Object value, URI currentFileURL) {
+        String refString;
+        if (value instanceof String) {
+            refString = (String) value;
+        } else if (value instanceof Map<?, ?> && ((Map) value).containsKey("$ref")) {
+            Object refObj = ((Map) value).get("$ref");
+            if (!(refObj instanceof String)) {
+                throw new IllegalArgumentException("Invalid $ref value");
+            }
+            refString = (String) refObj;
+            // Opcional: verificar que no haya otras claves no permitidas
+        } else {
+            return null;
+        }
+        return $Ref.of(refString, currentFileURL);
+    }
+
     private void replaceWith$Ref(ExtendedJsonContext jsonContext, String jsonPath, Object resolved) {
         Map<String, Object> original = jsonContext.read(jsonPath);
         if(original.containsKey("$ref") && original.size() == 1) {
@@ -397,11 +418,10 @@ public class $RefParser {
         }
         // resolve internal path
         if(StringUtils.isNotBlank($ref.getPath())) {
-            String jsonPaths[] = $ref.getPath().replace($Ref.REFERENCE_SEPARATOR, "").split("/");
+            String[] jsonPaths = $ref.getPath().replace($Ref.REFERENCE_SEPARATOR, "").split("/");
             String jsonPath = jsonPath(jsonPaths);
             try {
-                Object resolved = jsonContext.read(jsonPath);
-                return resolved;
+                return jsonContext.read(jsonPath);
             } catch (Exception e) {
                 log.error("Error reading internal path: {}", $ref, e);
                 throw e;
@@ -418,6 +438,9 @@ public class $RefParser {
     }
 
     private String jsonPath(String[] paths) {
+        if(paths.length == 0 || paths[0].isEmpty()) {
+            return "$";
+        }
         return "$" + Arrays.stream(paths).map(path -> "['" + escapeKey(path) + "']").collect(Collectors.joining());
     }
 

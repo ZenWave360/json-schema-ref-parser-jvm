@@ -75,7 +75,7 @@ public class  $Ref {
 
     @Override
     public String toString() {
-        return "$Ref {" + (uri != null? uri.toString() : "") + path + '}';
+        return "$Ref {" + (uri != null? uri.toString() : "") + (path != null? path : "") + '}';
     }
 
     @Override
@@ -104,6 +104,9 @@ public class  $Ref {
                 !refString.contains("$") &&
                 refString.indexOf(".") > 0) { // Path does not start with dot but contains "." (file extension)
             return "./" + refString;
+        }
+        if("#".equals(refString) || refString == null) {
+            return REFERENCE_SEPARATOR;
         }
         return refString;
     }
