@@ -177,20 +177,31 @@ public class $RefParser {
                 }
 
                 try {
+                    var isRoot = "$".equals(jsonPath);
                     var mergedAllOfObject = allOfObject.buildAllOfObject();
-                    $Ref originalRef = refs.getOriginalRef(originalAllOfRoot);
+                    $Ref originalRef = isRoot? $Ref.of("", uri) : refs.getOriginalRef(originalAllOfRoot);
                     if (originalRef != null) {
                         refs.saveOriginalRef(originalRef, mergedAllOfObject);
                     }
-                    refs.jsonContext.set(jsonPath, mergedAllOfObject);
+                    if (isRoot) {
+                        var root = refs.jsonContext.json();
+                        if(root instanceof Map) {
+                            ((Map) root).remove("allOf");
+                            ((Map) root).putAll(mergedAllOfObject);
+                        } else {
+                            throw new RuntimeException("Could not understand root: " + root);
+                        }
+                    } else {
+                        refs.jsonContext.set(jsonPath, mergedAllOfObject);
+                    }
                     refs.saveOriginalAllOf(mergedAllOfObject, allOf);
                 } catch (Exception e){
                     log.error("Error setting jsonPath:{} in file:{}", jsonPath, currentFileURL, e);
                     throw e;
                 }
             } else if(value instanceof Map) {
-                // visit
-                ((Map<String, Object>) value).entrySet().forEach(e -> {
+                // visit - use ArrayList to avoid ConcurrentModificationException
+                new ArrayList<>(((Map<String, Object>) value).entrySet()).forEach(e -> {
                     mergeAllOf(e.getValue(), ArrayUtils.add(paths, e.getKey()), currentFileURL);
                 });
             } else if(value instanceof List) {
@@ -257,6 +268,7 @@ public class $RefParser {
         return StringUtils.join(indent, "");
     }
     private void dereference(ExtendedJsonContext jsonContext, Object value, String[] paths, URI currentFileURL) {
+        // var $id = jsonContext.read("$['$id']");
         var visitedNodeRef = String.format("%s%s", currentFileURL, jsonPointer(paths));
         log.trace("{}visiting {}", indent(), visitedNodeRef);
         

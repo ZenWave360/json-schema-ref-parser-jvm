@@ -1,0 +1,18 @@
+$schema: https://json-schema.org/draft-07/schema
+$id: urn:schema:example:1.0.0
+title: Example
+type: object
+allOf:
+  - $ref: "#/definitions/Core"
+  - $ref: "#/definitions/Extension"
+definitions:
+  Core:
+    type: object
+    properties:
+      prop1:
+        type: string
+  Extension:
+    type: object
+    properties:
+      prop2:
+        type: string
