@@ -166,15 +166,7 @@ public class $RefParser {
                 Map<String, Object> originalAllOfRoot = refs.jsonContext.read(jsonPath);
 
                 AllOfObject allOfObject = new AllOfObject();
-                merge(allOfObject, originalAllOfRoot);
-                for (int i = 0; i < allOf.size(); i++) {
-                    if(allOf.get(i) instanceof Map) {
-                        Map<String, Object> item = (Map<String, Object>) allOf.get(i);
-                        merge(allOfObject, item);
-                    } else {
-                        throw new RuntimeException("Could not understand allOf: " + allOf.get(i));
-                    }
-                }
+                mergeAllOf(allOfObject, originalAllOfRoot);
 
                 try {
                     var isRoot = "$".equals(jsonPath);
@@ -216,20 +208,20 @@ public class $RefParser {
         }
     }
 
-    private void merge(AllOfObject allOfObject, List<Map<String, Object>> items) {
+    private void mergeAllOf(AllOfObject allOfObject, List<Map<String, Object>> items) {
         for (Map<String, Object> innerItem : items) {
-            merge(allOfObject, innerItem);
+            mergeAllOf(allOfObject, innerItem);
         }
     }
 
-    private void merge(AllOfObject allOfObject, Map<String, Object> item) {
+    private void mergeAllOf(AllOfObject allOfObject, Map<String, Object> item) {
         if(item.keySet().size() == 1 && item.containsKey("allOf")) {
             List<Map<String, Object>> items = (List) item.get("allOf");
-            merge(allOfObject, items);
+            mergeAllOf(allOfObject, items);
         } else {
             for (Map.Entry<String, Object> entry : item.entrySet()) {
                 if(entry.getKey().equals("allOf")) {
-                    merge(allOfObject, (List) item.get("allOf"));
+                    mergeAllOf(allOfObject, (List) item.get("allOf"));
                 } else {
                     allOfObject.allOf.put(entry.getKey(), entry.getValue());
                 }

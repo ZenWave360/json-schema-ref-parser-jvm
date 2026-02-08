@@ -266,9 +266,16 @@ public class ParserTest {
         File file = new File("src/test/resources/asyncapi/car-engine_chained_allOf.yml");
         $RefParser parser = new $RefParser(file).parse();
         $Refs refs = parser.dereference().mergeAllOf().getRefs();
-        // Assert.assertFalse(refs.circular);
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
+        
         assertNoAllOfs(refs.schema());
+        
+        // Verify Car has all properties from Base, Engine, and Car
+        var carProperties = (Map) refs.get("$.components.schemas.Car.properties");
+        Assert.assertTrue(carProperties.containsKey("reference")); // from Base
+        Assert.assertTrue(carProperties.containsKey("mileage")); // from Engine
+        Assert.assertTrue(carProperties.containsKey("make")); // from Car
+        
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
     }
 
     @Test
