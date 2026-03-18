@@ -41,11 +41,11 @@
 
     <slf4j-api.version>1.7.36</slf4j-api.version>
 
-    <jackson.version>2.18.3</jackson.version>
+    <jackson.version>2.20.1</jackson.version>
     <snakeyaml.version>2.4</snakeyaml.version>
     <json-path.version>2.9.0</json-path.version>
     <avro.version>1.8.2</avro.version>
-    <commons-lang3.version>3.17.0</commons-lang3.version>
+    <commons-lang3.version>3.19.0</commons-lang3.version>
     <commons-io.version>2.19.0</commons-io.version>
     <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
   </properties>
@@ -102,7 +102,13 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.13</version>
+      <version>1.5.13</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock-jre8</artifactId>
+      <version>2.35.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

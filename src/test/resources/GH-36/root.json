@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "allOf": [
+    { "$ref": "common.schema.json" }
+  ],
+  "properties": {
+    "a": {
+      "type": "integer"
+    }
+  },
+  "required": ["a" ]
+}

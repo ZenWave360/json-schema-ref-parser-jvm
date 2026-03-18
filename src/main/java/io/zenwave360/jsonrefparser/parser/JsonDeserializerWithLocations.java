@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,7 +29,7 @@ public class JsonDeserializerWithLocations extends UntypedObjectDeserializer {
     }
 
     JsonDeserializerWithLocations() {
-        super(null, null);
+        super((JavaType) null, (JavaType) null);
     }
 
     @Override

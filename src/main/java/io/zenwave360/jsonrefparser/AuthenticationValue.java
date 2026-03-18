@@ -21,6 +21,7 @@ public class AuthenticationValue {
     private String value;
     private AuthenticationType type = AuthenticationType.HEADER;
 
+    private List<String> urlPatterns = Arrays.asList("*");
     private Predicate<URL> urlMatcher = ANY_MATCH;
 
     public AuthenticationValue() {
@@ -60,6 +61,20 @@ public class AuthenticationValue {
         return this;
     }
 
+    public AuthenticationValue withUrlPattern(String urlPattern) {
+        this.urlPatterns = List.of(urlPattern);
+        return this;
+    }
+
+    public boolean matches(URL url) {
+        if(urlMatcher != null) {
+            return urlMatcher.test(url);
+        } else if(urlPatterns != null) {
+            return urlPatterns.stream().anyMatch(url.toString()::matches);
+        }
+        return ANY_MATCH.test(url);
+    }
+
     public String getKey() {
         return this.key;
     }
@@ -70,10 +85,6 @@ public class AuthenticationValue {
 
     public AuthenticationType getType() {
         return this.type;
-    }
-
-    public Predicate<URL> getUrlMatcher() {
-        return this.urlMatcher;
     }
 
     public void setKey(String key) {
@@ -90,5 +101,23 @@ public class AuthenticationValue {
 
     public void setUrlMatcher(Predicate<URL> urlMatcher) {
         this.urlMatcher = urlMatcher;
+    }
+
+    public void setUrlPattern(String urlPattern) {
+        this.urlPatterns = List.of(urlPattern);
+    }
+
+    public void setUrlPatterns(List<String> urlPatterns) {
+        this.urlPatterns = urlPatterns;
+    }
+
+    public String toString() {
+        return "AuthenticationValue{" +
+                "key='" + key + '\'' +
+                ", value='" + value + '\'' +
+                ", type=" + type +
+                ", urlPatterns=" + urlPatterns +
+                ", urlMatcher=" + urlMatcher +
+                '}';
     }
 }

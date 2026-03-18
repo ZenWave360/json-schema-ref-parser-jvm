@@ -1,0 +1,82 @@
+{
+  "$id": "http://example.com/schemas/test-schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Test Schema with Pattern Properties",
+  "type": "object",
+  "required": [
+    "name",
+    "info"
+  ],
+  "additionalProperties": false,
+  "patternProperties": {
+    "^x-[\\w\\d\\.\\x2d_]+$": {
+      "$ref": "#/definitions/extension"
+    }
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the object."
+    },
+    "info": {
+      "$ref": "#/definitions/info"
+    },
+    "metadata": {
+      "$ref": "#/definitions/metadata"
+    }
+  },
+  "definitions": {
+    "extension": {
+      "description": "Any property starting with x- is valid.",
+      "additionalProperties": true,
+      "additionalItems": true
+    },
+    "info": {
+      "type": "object",
+      "required": [
+        "version",
+        "title"
+      ],
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-[\\w\\d\\.\\x2d_]+$": {
+          "$ref": "#/definitions/extension"
+        }
+      },
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "A unique and precise title."
+        },
+        "version": {
+          "type": "string",
+          "description": "A semantic version number."
+        },
+        "description": {
+          "type": "string",
+          "description": "A longer description."
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-[\\w\\d\\.\\x2d_]+$": {
+          "$ref": "#/definitions/extension"
+        }
+      },
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
+
