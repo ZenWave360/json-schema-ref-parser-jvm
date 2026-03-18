@@ -1,0 +1,5 @@
+type: object
+properties:
+  order:
+    $ref: './models/events/publish/OrderCreated.yaml'
+

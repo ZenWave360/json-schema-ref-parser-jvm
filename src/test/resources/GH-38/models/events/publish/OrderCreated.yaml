@@ -1,0 +1,8 @@
+type: object
+properties:
+  orderId:
+    type: string
+  deliveryAddress:
+    $ref: '../../../shared/Address.yml'
+    description: Delivery address for the order
+

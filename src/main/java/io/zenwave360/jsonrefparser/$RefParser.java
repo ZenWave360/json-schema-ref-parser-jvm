@@ -327,7 +327,7 @@ public class $RefParser {
                     resolved = dereference($ref, jsonContext, currentFileURL);
                     this.refs.saveOriginalRef($ref, resolved);
                     // jsonContext.set(innerJsonPath, resolved);
-                    replaceWith$Ref(jsonContext, innerJsonPath, resolved);
+                    replaceWith$Ref(jsonContext, innerJsonPath, resolved, currentFileURL);
                 }catch (Exception e){
                     log.error("Error setting jsonPath: {} in {}", innerJsonPath,  currentFileURL, e);
                     throw e;
@@ -367,12 +367,12 @@ public class $RefParser {
         return $Ref.of(refString, currentFileURL);
     }
 
-    private void replaceWith$Ref(ExtendedJsonContext jsonContext, String jsonPath, Object resolved) {
+    private void replaceWith$Ref(ExtendedJsonContext jsonContext, String jsonPath, Object resolved, URI currentFileURL) {
         Map<String, Object> original = jsonContext.read(jsonPath);
         if(original.containsKey("$ref") && original.size() == 1) {
             mergeResolvedIntoOriginal(jsonContext, jsonPath, resolved);
         } else {
-            mergeResolvedAndReplaceOriginal(jsonContext, jsonPath, resolved);
+            mergeResolvedAndReplaceOriginal(jsonContext, jsonPath, resolved, currentFileURL);
         }
     }
 
@@ -388,14 +388,14 @@ public class $RefParser {
         jsonContext.set(jsonPath, resolved);
     }
 
-    private void mergeResolvedAndReplaceOriginal(ExtendedJsonContext jsonContext, String jsonPath, Object resolved) {
+    private void mergeResolvedAndReplaceOriginal(ExtendedJsonContext jsonContext, String jsonPath, Object resolved, URI currentFileURL) {
         // losing original reference, they will become different objects
         Map<String, Object> original = jsonContext.read(jsonPath);
         Map<String, Object> replacement = new LinkedHashMap<>();
         replacement.putAll(original);
         replacement.remove("$ref");
         replacement.putAll((Map) resolved);
-        $Ref originalRef = $Ref.of((String) original.get("$ref"), uri);
+        $Ref originalRef = $Ref.of((String) original.get("$ref"), currentFileURL);
         this.refs.saveReplacedRef(originalRef, replacement);
         jsonContext.set(jsonPath, replacement);
     }
