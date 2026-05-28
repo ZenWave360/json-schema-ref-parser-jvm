@@ -65,6 +65,19 @@ public class $Refs {
                 .findFirst().orElse(null);
     }
 
+    public $Ref getReplacedRef(Object obj) {
+        Object originalAllOf = getOriginalAllOf(obj);
+        return replacedRefsList.stream()
+                .filter(pair -> isOriginalRef(obj, pair.getValue(), originalAllOf))
+                .map(pair -> pair.getKey())
+                .findFirst().orElse(null);
+    }
+
+    public $Ref getOriginalOrReplacedRef(Object obj) {
+        $Ref originalRef = getOriginalRef(obj);
+        return originalRef != null ? originalRef : getReplacedRef(obj);
+    }
+
     public Object getObjectForRef($Ref ref) {
         return originalRefsList.stream()
                 .filter(pair -> pair.getKey().toString().equals(ref.toString()))
