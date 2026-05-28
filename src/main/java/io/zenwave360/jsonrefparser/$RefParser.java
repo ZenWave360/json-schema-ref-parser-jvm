@@ -296,6 +296,16 @@ public class $RefParser {
                 var targetNodeRef = String.format("%s%s", 
                     ObjectUtils.firstNonNull($ref.getURI(), currentFileURL), 
                     ObjectUtils.firstNonNull($ref.getPath(), ""));
+                if(currentPath.contains(targetNodeRef)) {
+                    this.refs.circular = true;
+                    log.debug("{}Skipping circular replacement: {} -> {}", indent(), visitedNodeRef, targetNodeRef);
+                    if(options != null && $RefParserOptions.OnCircular.FAIL == options.onCircular) {
+                        throw new RuntimeException("Failing: Circular references not allowed at " + targetNodeRef);
+                    }
+                    if(options != null && $RefParserOptions.OnCircular.SKIP == options.onCircular) {
+                        return;
+                    }
+                }
                 
                 // do dereference
                 String[] innerJsonPaths = Arrays.copyOf(paths, paths.length -1);

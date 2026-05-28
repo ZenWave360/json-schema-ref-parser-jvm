@@ -351,7 +351,12 @@ public class ParserTest {
         {
             $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular($RefParserOptions.OnCircular.SKIP)).parse();
             $Refs refs = parser.dereference().getRefs();
+            Map<String, Object> propertyMsg = (Map<String, Object>) refs.get("$.components.schemas.PropertyMsg");
+            Map<String, Object> innerItems = (Map<String, Object>) refs.get("$.components.schemas.PropertyMsg.properties.innerProperties.items");
             Assert.assertTrue(refs.circular);
+            Assert.assertNotSame(propertyMsg, innerItems);
+            Assert.assertEquals("#/components/schemas/PropertyMsg",
+                    innerItems.get("$ref"));
 //            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(refs.schema()));
         }
 
