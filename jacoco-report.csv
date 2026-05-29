@@ -7,7 +7,7 @@ io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,Cust
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser.parser,Parser,16,150,3,5,4,32,4,7,1,6
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,AuthenticationValue.AuthenticationType,0,15,0,0,0,3,0,1,0,1
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.Refs,149,305,27,19,31,51,29,28,11,23
-io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParser,219,1381,25,97,35,234,24,73,4,32
+io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParser,236,1414,31,101,37,239,28,74,4,32
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParser.AllOfObject,0,46,1,3,0,10,1,3,0,2
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParserOptions,12,19,0,0,3,8,1,3,1,3
 io.zenwave360:json-schema-ref-parser-jvm,io.zenwave360.jsonrefparser,.RefParserOptions.OnCircular,0,21,0,0,0,4,0,1,0,1
